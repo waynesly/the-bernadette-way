@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS submissions (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), student_name TEXT NOT NULL, class_name TEXT NOT NULL, responses JSONB NOT NULL, scores JSONB NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now())
