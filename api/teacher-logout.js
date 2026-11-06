@@ -1,1 +1,4 @@
-export const access="public";export const methods=["POST"];export default async function(req,res){res.cookie("strength_teacher","",{httpOnly:true,secure:true,sameSite:"strict",path:"/",maxAge:0});res.json({ok:true})}
+import {revokeToken} from "lib/teacher-auth.js";
+export const access="public";
+export const methods=["POST"];
+export default async function(req,res){await revokeToken(req);res.cookie("strength_teacher","",{httpOnly:true,secure:true,sameSite:"strict",path:"/",maxAge:0});res.json({ok:true})}
