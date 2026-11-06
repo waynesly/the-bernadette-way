@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS teacher_login_attempts (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), client_ip TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now())
