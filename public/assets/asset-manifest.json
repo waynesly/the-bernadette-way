@@ -8,8 +8,8 @@
       "id": "SOS-HERO-001",
       "file": "leadership-adventure-hero-v1-site.jpg",
       "role": "Welcome-page decorative hero",
-      "dimensions": "280x157",
-      "status": "approved-local-delivery-ready",
+      "dimensions": "480x270",
+      "status": "approved-and-integrated",
       "source": "Original AI-generated illustration, 2026-11-07"
     },
     {
@@ -22,36 +22,12 @@
     }
   ],
   "artwork_backlog": [
-    {
-      "family": "virtue cards",
-      "quantity": 6,
-      "status": "planned"
-    },
-    {
-      "family": "strength icons",
-      "quantity": 24,
-      "status": "planned"
-    },
-    {
-      "family": "journey scenes",
-      "quantity": 5,
-      "status": "planned"
-    },
-    {
-      "family": "challenge scenes",
-      "quantity": 8,
-      "status": "planned"
-    },
-    {
-      "family": "teacher-report visuals",
-      "quantity": 4,
-      "status": "planned"
-    },
-    {
-      "family": "completion visuals",
-      "quantity": 3,
-      "status": "planned"
-    }
+    {"family": "virtue cards", "quantity": 6, "status": "planned"},
+    {"family": "strength icons", "quantity": 24, "status": "planned"},
+    {"family": "journey scenes", "quantity": 5, "status": "planned"},
+    {"family": "challenge scenes", "quantity": 8, "status": "planned"},
+    {"family": "teacher-report visuals", "quantity": 4, "status": "planned"},
+    {"family": "completion visuals", "quantity": 3, "status": "planned"}
   ],
   "notes": "Two original foundation assets are complete. The remaining 50 assets are intentionally tracked as planned, not represented by placeholders."
 }
