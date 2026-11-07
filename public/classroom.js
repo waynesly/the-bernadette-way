@@ -12,6 +12,7 @@ document.querySelectorAll(".nav").forEach(button=>button.onclick=()=>showView(bu
 document.querySelectorAll(".tab").forEach(button=>button.onclick=()=>showTeacherTab(button.dataset.teacherTab));
 $("joinForm").onsubmit=joinStudent;$("nextQuestion").onclick=nextQuestion;$("backQuestion").onclick=()=>{if(index){index--;renderQuestion()}};$("returnStudent").onclick=()=>showStudentSummary();
 $("teacherLoginForm").onsubmit=teacherLogin;$("teacherSignOut").onclick=teacherLogout;$("createClassForm").onsubmit=createClass;$("openClassForm").onsubmit=openClass;$("saveWindow").onclick=setWindow;$("printCodes").onclick=printCodes;$("buildGroups").onclick=buildGroups;
+if(new URLSearchParams(window.location.search).get("view")==="teacher")showView("teacher");
 // Students always enter their own code before a profile is opened.
 function showView(view){$("studentView").hidden=view!=="student";$("teacherView").hidden=view!=="teacher";$("studentNav").hidden=view==="student";$("teacherNav").hidden=view==="teacher";window.scrollTo({top:0,behavior:"smooth"})}
 function showTeacherTab(tab){$("createClass").hidden=tab!=="create";$("openClass").hidden=tab!=="open";document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.teacherTab===tab))}
