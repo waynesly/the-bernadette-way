@@ -8,8 +8,10 @@ export default async function(req,res){
   const {rows}=await db.query("SELECT s.id,c.current_window FROM classroom_baseline_students s JOIN classroom_baseline_classes c ON c.id=s.class_id WHERE s.join_code_hash=$1 LIMIT 1",[await hash(code)]);
   if(!rows.length)return res.status(404).json({error:"We could not find your student profile."});
   const student=rows[0],body=req.body||{},responses=body.responses,window=student.current_window;
-  if(!validResponses(responses,window))return res.status(400).json({error:"Please answer every check-in statement before saving."});
+  const questionCount=questionsForWindow(window).length;
+  const validDraft=Array.isArray(responses)&&responses.length===questionCount&&responses.every(value=>value===null||(Number.isInteger(value)&&value>=1&&value<=5));
   if(body.action==="save"){
+    if(!validDraft)return res.status(400).json({error:"We could not save this answer. Please try again."});
     const saved=await db.query(`INSERT INTO classroom_baseline_attempts(student_id,assessment_window,responses)
       VALUES($1,$2,$3::jsonb) ON CONFLICT(student_id,assessment_window) DO UPDATE SET responses=EXCLUDED.responses,updated_at=now()
       WHERE classroom_baseline_attempts.status='draft' RETURNING id,status`,[student.id,window,JSON.stringify(responses)]);
@@ -17,6 +19,7 @@ export default async function(req,res){
     return res.json({ok:true,status:"draft"});
   }
   if(body.action==="complete"){
+    if(!validResponses(responses,window))return res.status(400).json({error:"Please answer every check-in statement before saving."});
     const scores=score(responses,window);
     const completed=await db.query(`INSERT INTO classroom_baseline_attempts(student_id,assessment_window,status,responses,scores,completed_at)
       VALUES($1,$2,'completed',$3::jsonb,$4::jsonb,now())
