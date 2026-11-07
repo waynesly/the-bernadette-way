@@ -49,3 +49,4 @@ footer{background:#EAF1F5;color:#466176}
  .teacher-tabs{width:100%}
  .tab{flex:1}
 }
+@media print{.print-sheet,.brand-report{font-family:var(--font-body)!important}.print-sheet h1,.print-sheet h2,.print-sheet h3{font-family:var(--font-display)!important}}

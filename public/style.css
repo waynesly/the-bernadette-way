@@ -10,4 +10,4 @@ button,.primary,.secondary,.nav-button{font-family:var(--font-body)!important}
 .primary,.secondary,.nav-button{min-height:44px;transition:transform .15s ease,box-shadow .15s ease}
 .primary:hover,.secondary:hover,.nav-button:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(14,55,94,.14)}
 input:focus,textarea:focus,select:focus{border-color:var(--sbcps-teal)!important;box-shadow:0 0 0 3px rgba(8,127,140,.12)!important;outline:0}
-@media(max-width:700px){.site-header{position:static}.site-header .header-inner{min-height:64px}}
+@media(max-width:700px){.site-header{position:static}.site-header .header-inner{min-height:64px}}@media print{.printreport,.printreport *{font-family:var(--font-body)!important}.printreport h1,.printreport h2,.printreport h3{font-family:var(--font-display)!important}}
