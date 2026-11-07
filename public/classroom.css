@@ -50,3 +50,5 @@ footer{background:#EAF1F5;color:#466176}
  .tab{flex:1}
 }
 @media print{.print-sheet,.brand-report{font-family:var(--font-body)!important}.print-sheet h1,.print-sheet h2,.print-sheet h3{font-family:var(--font-display)!important}}
+/* The welcome composition uses copy and the sign-in card as its two primary columns. */
+.hero>#joinScreen{} .hero>.window-journey-art{display:none}
