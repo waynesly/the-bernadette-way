@@ -34,6 +34,14 @@ export default async function(req,res){
     }
     const classroom=await classForAccess(body.classId,code(body.accessCode));
     if(!classroom)return res.status(403).json({error:"That class access code is not recognised."});
+    if(body.action==="get_class"){
+      const {rows}=await db.query(`SELECT s.id,s.display_name,a.assessment_window,a.status,a.scores,a.completed_at,a.responses
+        FROM classroom_baseline_students s LEFT JOIN classroom_baseline_attempts a ON a.student_id=s.id
+        WHERE s.class_id=$1 ORDER BY s.display_name,a.assessment_window`,[classroom.id]);
+      const students={};
+      for(const row of rows){const student=students[row.id]||={id:row.id,display_name:row.display_name,attempts:{}};if(row.assessment_window)student.attempts[row.assessment_window]={status:row.status,scores:row.scores,completed_at:row.completed_at,responses:row.responses};students[row.id]=student}
+      return res.json({classroom:{id:classroom.id,class_name:classroom.class_name,current_window:classroom.current_window},students:Object.values(students)});
+    }
     if(body.action==="set_window"){
       const window=body.assessmentWindow;
       if(window!=="start_of_year"&&window!=="end_of_year")return res.status(400).json({error:"Choose a valid assessment window."});
