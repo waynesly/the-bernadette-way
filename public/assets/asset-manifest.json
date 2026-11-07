@@ -1,0 +1,57 @@
+{
+  "library": "Science of Strengths – Year 5 Leadership Adventure",
+  "version": "1.0.0",
+  "updated": "2026-11-07",
+  "usage": "Use approved assets only in this project. Do not add text, logos, or student-identifying information to the artwork.",
+  "assets": [
+    {
+      "id": "SOS-HERO-001",
+      "file": "leadership-adventure-hero-v1-site.jpg",
+      "role": "Welcome-page decorative hero",
+      "dimensions": "280x157",
+      "status": "approved-local-delivery-ready",
+      "source": "Original AI-generated illustration, 2026-11-07"
+    },
+    {
+      "id": "SOS-CHAR-REF-001",
+      "file": "character-reference-sheet-v1.png",
+      "role": "Canonical six-character visual reference",
+      "dimensions": "1672x941",
+      "status": "approved-reference",
+      "source": "Original AI-generated illustration, 2026-11-07"
+    }
+  ],
+  "artwork_backlog": [
+    {
+      "family": "virtue cards",
+      "quantity": 6,
+      "status": "planned"
+    },
+    {
+      "family": "strength icons",
+      "quantity": 24,
+      "status": "planned"
+    },
+    {
+      "family": "journey scenes",
+      "quantity": 5,
+      "status": "planned"
+    },
+    {
+      "family": "challenge scenes",
+      "quantity": 8,
+      "status": "planned"
+    },
+    {
+      "family": "teacher-report visuals",
+      "quantity": 4,
+      "status": "planned"
+    },
+    {
+      "family": "completion visuals",
+      "quantity": 3,
+      "status": "planned"
+    }
+  ],
+  "notes": "Two original foundation assets are complete. The remaining 50 assets are intentionally tracked as planned, not represented by placeholders."
+}
