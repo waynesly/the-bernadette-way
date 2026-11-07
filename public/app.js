@@ -34,7 +34,7 @@ function info(name){return strengthInfo[name]||['✦','A strength you can keep g
 function theme(i){const p=palette[i%palette.length];return '--card-bg:'+p[0]+';--card-fg:'+p[1]}
 function sortedScores(scores){return Object.entries(scores).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]))}
 function jumpTop(){window.scrollTo({top:0,behavior:'smooth'})}
-function showTab(t){$('student').hidden=t!=='student';$('teacher').hidden=t!=='teacher';$('studentTab').classList.toggle('active',t==='student');$('teacherTab').classList.toggle('active',t==='teacher');if(t==='teacher')loadTeacher();jumpTop()}
+function showTab(t){$('student').hidden=t!=='student';$('teacher').hidden=t!=='teacher';const teacherTab=$('teacherTab');if(teacherTab){teacherTab.hidden=t==='teacher';teacherTab.classList.toggle('active',t==='teacher')}if(t==='teacher')loadTeacher();jumpTop()}
 async function start(){
  if(submitted)return;
  const code=$('year5JoinCode').value.trim().toUpperCase();
