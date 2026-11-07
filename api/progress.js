@@ -46,7 +46,7 @@ export default async function(req,res) {
     await db.query("DELETE FROM assessment_progress WHERE resume_token_hash=$1",[tokenHash]);
     return res.json({ok:true});
   }
-  const {rows} = await db.query("SELECT student_name,class_name,responses,current_question,assessment_version,updated_at FROM assessment_progress WHERE resume_token_hash=$1 LIMIT 1",[tokenHash]);
+  const {rows} = await db.query("SELECT student_name,class_name,responses,current_question,assessment_version,completed_at,completed_scores,completed_submission_id,updated_at FROM assessment_progress WHERE resume_token_hash=$1 LIMIT 1",[tokenHash]);
   if (!rows.length) return res.status(404).json({error:"No saved assessment was found."});
   const progress = rows[0];
   if (!Array.isArray(progress.responses) || progress.responses.length > 96 || !progress.responses.every(value => value === null || (Number.isInteger(value) && value >= 1 && value <= 5))) {
