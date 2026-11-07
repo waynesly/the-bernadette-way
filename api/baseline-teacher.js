@@ -51,6 +51,20 @@ export default async function(req,res){
         ON CONFLICT(student_id,assessment_window) DO UPDATE SET tags=EXCLUDED.tags,note=EXCLUDED.note,updated_at=now()`,[studentId,classroom.current_window,JSON.stringify(tags),note]);
       return res.json({ok:true});
     }
+    if(body.action==="clear_student_data"){
+      const scope=body.scope==="class"?"class":"student";
+      const studentId=String(body.studentId||"");
+      if(scope==="student"){
+        const belongs=await db.query("SELECT id FROM classroom_baseline_students WHERE id=$1 AND class_id=$2",[studentId,classroom.id]);
+        if(!belongs.rows.length)return res.status(404).json({error:"Student not found in this class."});
+        await db.query("DELETE FROM classroom_baseline_observations WHERE student_id=$1",[studentId]);
+        await db.query("DELETE FROM classroom_baseline_attempts WHERE student_id=$1",[studentId]);
+        return res.json({ok:true,scope:"student"});
+      }
+      await db.query("DELETE FROM classroom_baseline_observations WHERE student_id IN (SELECT id FROM classroom_baseline_students WHERE class_id=$1)",[classroom.id]);
+      await db.query("DELETE FROM classroom_baseline_attempts WHERE student_id IN (SELECT id FROM classroom_baseline_students WHERE class_id=$1)",[classroom.id]);
+      return res.json({ok:true,scope:"class"});
+    }
     return res.status(400).json({error:"Unknown teacher action."});
   }
   const classroom=await classForAccess(req.query.classId,code(req.query.accessCode));
