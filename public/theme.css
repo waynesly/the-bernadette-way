@@ -1,1 +1,32 @@
-:root{--primary:#0e375e;--accent:#ed193f}
+@import url('https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@700;800&family=Oswald:wght@400;500&family=Source+Sans+3:wght@400;600;700&display=swap');
+
+:root{
+  --sbcps-navy:#0E375E;
+  --sbcps-teal:#087F8C;
+  --sbcps-red:#ED193F;
+  --sbcps-gold:#F7BD3D;
+  --sbcps-ink:#17304B;
+  --sbcps-muted:#587082;
+  --sbcps-paper:#FFFCF7;
+  --sbcps-surface:#FFFFFF;
+  --sbcps-line:#D7E2E7;
+  --sbcps-mint:#E4F4F2;
+  --font-display:'Alegreya Sans', Georgia, serif;
+  --font-label:'Oswald', Arial, sans-serif;
+  --font-body:'Source Sans 3', Arial, sans-serif;
+  --radius-sm:10px;
+  --radius-md:18px;
+  --shadow-card:0 12px 30px rgba(14,55,94,.08);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit}
+button,a,input,textarea,select{touch-action:manipulation}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
+  outline:3px solid var(--sbcps-gold)!important;
+  outline-offset:3px;
+}
+@media (prefers-reduced-motion:reduce){
+  *,*:before,*:after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}
+}
