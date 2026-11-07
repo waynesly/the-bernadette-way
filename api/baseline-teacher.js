@@ -43,7 +43,7 @@ export default async function(req,res){
       return res.json({ok:true,currentWindow:window});
     }
     if(body.action==="save_observation"){
-      const studentId=String(body.studentId||"");const tags=[...new Set((Array.isArray(body.tags)?body.tags:[]).map(x=>cleanText(x,40)).filter(x=>["Settling well","Quiet confidence","Needs check-in","Thrives in pairs"].includes(x)))].slice(0,4);
+      const studentId=String(body.studentId||"");const tags=[...new Set((Array.isArray(body.tags)?body.tags:[]).map(x=>cleanText(x,40)).filter(x=>["Joins in readily","Thoughtful observer","Needs predictable routines","Thrives with a partner","Ready to lead"].includes(x)))].slice(0,4);
       const note=cleanText(body.note,400);
       const belongs=await db.query("SELECT id FROM classroom_baseline_students WHERE id=$1 AND class_id=$2",[studentId,classroom.id]);
       if(!belongs.rows.length)return res.status(404).json({error:"Student not found in this class."});

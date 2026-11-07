@@ -1,5 +1,5 @@
 import { db } from "hatchable";
-import { hash, studentCode, validCode } from "lib/classroom-baseline.js";
+import { hash, studentCode, validCode, questionsForWindow } from "lib/classroom-baseline.js";
 export const access="public";
 export const methods=["GET","POST"];
 async function profile(code){
@@ -17,5 +17,5 @@ export default async function(req,res){
   if(!validCode(code))return res.status(400).json({error:"Enter the eight-character join code from your teacher."});
   const data=await profile(code);
   if(!data)return res.status(404).json({error:"We could not find that student code. Check it with your teacher."});
-  return res.json({...data,studentCode:code});
+  return res.json({...data,studentCode:code,questions:questionsForWindow(data.student.current_window)});
 }
