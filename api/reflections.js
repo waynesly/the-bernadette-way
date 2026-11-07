@@ -7,7 +7,7 @@ async function digest(value) {
 }
 function tokenFrom(req) {
   const token = String(req.headers["x-strengths-resume"] || "");
-  return /^[a-f0-9-]{72}$/.test(token) ? token : null;
+  return /^[a-f0-9-]{72}$/.test(token) || /^y5_[A-HJ-NP-Z2-9]{8}$/.test(token) ? token : null;
 }
 function text(value, limit) {
   return String(value || "").trim().slice(0, limit);

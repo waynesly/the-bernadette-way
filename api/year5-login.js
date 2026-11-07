@@ -1,0 +1,5 @@
+import { db } from "hatchable";
+import { hash, validCode } from "lib/classroom-baseline.js";
+export const access="public";
+export const methods=["POST"];
+export default async function(req,res){res.setHeader("Cache-Control","no-store");const joinCode=String(req.body?.joinCode||"").trim().toUpperCase();if(!validCode(joinCode))return res.status(400).json({error:"Enter the eight-character code from your teacher."});const {rows}=await db.query("SELECT s.id,s.display_name,s.completed_at,r.class_name FROM year5_roster_students s JOIN year5_rosters r ON r.id=s.roster_id WHERE s.join_code_hash=$1 LIMIT 1",[await hash(joinCode)]);if(!rows.length)return res.status(404).json({error:"We could not find that student code. Check it with your teacher."});const student=rows[0];res.json({student:{id:student.id,name:student.display_name,className:student.class_name,completedAt:student.completed_at},resumeToken:"y5_"+joinCode})}

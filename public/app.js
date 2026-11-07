@@ -37,34 +37,27 @@ function jumpTop(){window.scrollTo({top:0,behavior:'smooth'})}
 function showTab(t){$('student').hidden=t!=='student';$('teacher').hidden=t!=='teacher';$('studentTab').classList.toggle('active',t==='student');$('teacherTab').classList.toggle('active',t==='teacher');if(t==='teacher')loadTeacher();jumpTop()}
 async function start(){
  if(submitted)return;
- student=$('studentName').value.trim();clazz=$('className').value.trim();
- if(!student||!clazz){$('welcomeError').textContent='Please enter your name or ID and class.';return}
+ const code=$('year5JoinCode').value.trim().toUpperCase();
+ if(!code){$('welcomeError').textContent='Enter the join code your teacher gave you.';return}
  $('welcomeError').textContent='';
- if(resumeToken){
-   try{
-     const restored=await fetch('/api/progress',{headers:{'X-Strengths-Resume':resumeToken}});
-     if(restored.ok){
-       const data=await restored.json(),saved=data.progress;
-       if(saved.student_name===student&&saved.class_name===clazz&&Array.isArray(saved.responses)){
-         answers=saved.responses.concat(Array(Math.max(0,96-saved.responses.length)).fill(null)).slice(0,96);
-         page=Math.min(Math.max(0,saved.current_question||0),95);
-         $('welcome').hidden=true;
-         if(saved.completed_at&&saved.completed_scores){
-           submitted=true;studentScores=saved.completed_scores;$('result').hidden=false;renderResults(saved.completed_scores);jumpTop();return;
-         }
-         $('quiz').hidden=false;renderPage();jumpTop();return;
-       }
-     }
-   }catch(e){}
-   localStorage.removeItem('sos.resume.v1');resumeToken=null;
- }
  try{
-   const created=await fetch('/api/progress',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:student,className:clazz,responses:answers,currentQuestion:0})});
-   const data=await created.json();
-   if(!created.ok)throw Error(data.error||'Unable to prepare your saved progress.');
-   resumeToken=data.resumeToken;localStorage.setItem('sos.resume.v1',resumeToken);
- }catch(e){$('welcomeError').textContent='We could not prepare your saved progress. Please try again.';return}
- $('welcome').hidden=true;$('quiz').hidden=false;renderPage();jumpTop()
+   const login=await fetch('/api/year5-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({joinCode:code})});
+   const identity=await login.json();
+   if(!login.ok)throw Error(identity.error||'We could not find that student code.');
+   student=identity.student.name;clazz=identity.student.className;resumeToken=identity.resumeToken;localStorage.setItem('sos.resume.v1',resumeToken);
+   const restored=await fetch('/api/progress',{headers:{'X-Strengths-Resume':resumeToken}});
+   if(restored.ok){
+     const data=await restored.json(),saved=data.progress;
+     answers=saved.responses.concat(Array(Math.max(0,96-saved.responses.length)).fill(null)).slice(0,96);
+     page=Math.min(Math.max(0,saved.current_question||0),95);
+     $('welcome').hidden=true;
+     if(saved.completed_at&&saved.completed_scores){submitted=true;studentScores=saved.completed_scores;$('result').hidden=false;renderResults(saved.completed_scores);jumpTop();return}
+     $('quiz').hidden=false;renderPage();jumpTop();return;
+   }
+   const created=await fetch('/api/progress',{method:'POST',headers:{'Content-Type':'application/json','X-Strengths-Resume':resumeToken},body:JSON.stringify({responses:answers,currentQuestion:0})});
+   const data=await created.json();if(!created.ok)throw Error(data.error||'Unable to prepare your saved progress.');
+   $('welcome').hidden=true;$('quiz').hidden=false;renderPage();jumpTop();
+ }catch(e){$('welcomeError').textContent=e.message||'We could not prepare your saved progress. Please try again.'}
 }
 function scheduleProgressSave(){
  if(!resumeToken||submitted)return;

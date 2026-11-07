@@ -1,25 +1,8 @@
 import { db } from "hatchable";
-import { ASSESSMENT_VERSION, scoreResponses, validResponses } from "lib/scoring.js";
-const encoder = new TextEncoder();
-async function digest(value) {
-  const bytes = new Uint8Array(await crypto.subtle.digest("SHA-256", encoder.encode(value)));
-  return [...bytes].map(byte => byte.toString(16).padStart(2, "0")).join("");
-}
-function resumeToken(req) {
-  const token = String(req.headers["x-strengths-resume"] || "");
-  return /^[a-f0-9-]{72}$/.test(token) ? token : null;
-}
-export const access = "public";
-export const methods = ["POST"];
-export default async function(req,res) {
-  const body = req.body || {};
-  const name = String(body.name || "").trim().slice(0,100);
-  const className = String(body.className || "").trim().slice(0,80);
-  const responses = body.responses;
-  if (!name || !className || !validResponses(responses)) return res.status(400).json({error:"Enter your name, class and all 96 ratings."});
-  const scores = scoreResponses(responses);
-  const {rows} = await db.query("INSERT INTO submissions (student_name,class_name,responses,scores,assessment_version) VALUES ($1,$2,$3::jsonb,$4::jsonb,$5) RETURNING id,created_at",[name,className,JSON.stringify(responses),JSON.stringify(scores),ASSESSMENT_VERSION]);
-  const token = resumeToken(req);
-  if (token) await db.query("UPDATE assessment_progress SET completed_at=now(),completed_scores=$2::jsonb,completed_submission_id=$3 WHERE resume_token_hash=$1",[await digest(token),JSON.stringify(scores),rows[0].id]);
-  res.json({id:rows[0].id,createdAt:rows[0].created_at,scores,assessmentVersion:ASSESSMENT_VERSION});
-}
+import { ASSESSMENT_VERSION,scoreResponses,validResponses } from "lib/scoring.js";
+import { hash,validCode } from "lib/classroom-baseline.js";
+function token(req){const value=String(req.headers["x-strengths-resume"]||"");return /^[a-f0-9-]{72}$/.test(value)||/^y5_[A-HJ-NP-Z2-9]{8}$/.test(value)?value:null}
+async function year5Student(value){if(!value?.startsWith("y5_"))return null;const code=value.slice(3);if(!validCode(code))return null;const {rows}=await db.query("SELECT s.id,s.display_name,s.completed_at,r.class_name FROM year5_roster_students s JOIN year5_rosters r ON r.id=s.roster_id WHERE s.join_code_hash=$1 LIMIT 1",[await hash(code)]);return rows[0]||null}
+export const access="public";
+export const methods=["POST"];
+export default async function(req,res){const body=req.body||{},resumeToken=token(req),rosterStudent=await year5Student(resumeToken);if(resumeToken?.startsWith("y5_")&&!rosterStudent)return res.status(404).json({error:"We could not find this Year 5 student code."});const name=rosterStudent?.display_name||String(body.name||"").trim().slice(0,100),className=rosterStudent?.class_name||String(body.className||"").trim().slice(0,80),responses=body.responses;if(!name||!className||!validResponses(responses))return res.status(400).json({error:"Enter your name, class and all 96 ratings."});if(rosterStudent?.completed_at)return res.status(409).json({error:"This Leadership Adventure has already been completed."});const scores=scoreResponses(responses);try{const {rows}=await db.query("INSERT INTO submissions(student_name,class_name,responses,scores,assessment_version,year5_roster_student_id) VALUES($1,$2,$3::jsonb,$4::jsonb,$5,$6) RETURNING id,created_at",[name,className,JSON.stringify(responses),JSON.stringify(scores),ASSESSMENT_VERSION,rosterStudent?.id||null]);if(resumeToken)await db.query("UPDATE assessment_progress SET completed_at=now(),completed_scores=$2::jsonb,completed_submission_id=$3 WHERE resume_token_hash=$1",[await hash(resumeToken),JSON.stringify(scores),rows[0].id]);if(rosterStudent)await db.query("UPDATE year5_roster_students SET completed_at=now() WHERE id=$1",[rosterStudent.id]);res.json({id:rows[0].id,createdAt:rows[0].created_at,scores,assessmentVersion:ASSESSMENT_VERSION})}catch(error){return res.status(409).json({error:"This Leadership Adventure has already been completed."})}}
