@@ -26,6 +26,20 @@
  .site-nav .school-brand{max-width:100%}
  .site-nav .school-brand img{max-width:100%}
 }
+/* Compact accessible navigation for tablet and mobile */
+.site-menu-toggle{display:none}
+@media(max-width:900px){
+.site-nav{position:relative!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important}
+.site-nav .school-brand{flex:0 1 auto}
+.site-nav .site-menu-toggle{display:inline-flex!important;align-items:center;justify-content:center;min-width:48px;min-height:48px;padding:9px 16px;margin-left:auto;border:2px solid #ffffff9c;border-radius:10px;background:transparent;color:#fff;font:700 15px/1.2 system-ui,sans-serif;cursor:pointer}
+.site-nav .site-nav-links{display:none!important;flex-basis:100%;width:100%!important;margin:0!important;padding:10px 0 8px;flex-direction:column!important;align-items:stretch!important;gap:3px!important}
+.site-nav .site-nav-links.is-open{display:flex!important}
+.site-nav .site-nav-links a,.site-nav .site-nav-links button{display:flex!important;width:100%!important;min-height:48px;font-size:15px;padding:12px 14px}
+.site-nav .site-nav-links [hidden]{display:none!important}
+.site-nav .site-nav-section{margin:12px 0 4px;padding:0 12px}
+.site-nav .site-menu-toggle:focus-visible,.site-nav .site-nav-links a:focus-visible,.site-nav .site-nav-links button:focus-visible{outline:3px solid #f3ca69;outline-offset:3px}
+}
+
 @media(max-width:480px){
  .site-nav{padding:12px 14px!important}
  .site-nav .site-nav-links{gap:5px}
