@@ -61,5 +61,18 @@ export default async function(req,res){
     if(scope==="student"){const belongs=await db.query("SELECT id FROM classroom_baseline_students WHERE id=$1 AND class_id=$2",[studentId,classroom.id]);if(!belongs.rows.length)return res.status(404).json({error:"Student not found in this class."});await db.query("DELETE FROM classroom_baseline_observations WHERE student_id=$1",[studentId]);await db.query("DELETE FROM classroom_baseline_attempts WHERE student_id=$1",[studentId]);return res.json({ok:true,scope:"student"})}
     await db.query("DELETE FROM classroom_baseline_observations WHERE student_id IN (SELECT id FROM classroom_baseline_students WHERE class_id=$1)",[classroom.id]);await db.query("DELETE FROM classroom_baseline_attempts WHERE student_id IN (SELECT id FROM classroom_baseline_students WHERE class_id=$1)",[classroom.id]);return res.json({ok:true,scope:"class"});
   }
+  if(body.action==="remove_student"){
+    const studentId=String(body.studentId||"");
+    const belongs=await db.query("SELECT id FROM classroom_baseline_students WHERE id=$1 AND class_id=$2",[studentId,classroom.id]);
+    if(!belongs.rows.length)return res.status(404).json({error:"Student not found in this class."});
+    await db.query("DELETE FROM classroom_baseline_observations WHERE student_id=$1",[studentId]);
+    await db.query("DELETE FROM classroom_baseline_students WHERE id=$1",[studentId]);
+    return res.json({ok:true});
+  }
+  if(body.action==="delete_class"){
+    await db.query("DELETE FROM classroom_baseline_observations WHERE student_id IN (SELECT id FROM classroom_baseline_students WHERE class_id=$1)",[classroom.id]);
+    await db.query("DELETE FROM classroom_baseline_classes WHERE id=$1",[classroom.id]);
+    return res.json({ok:true});
+  }
   return res.status(400).json({error:"Unknown teacher action."});
 }
