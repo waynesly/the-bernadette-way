@@ -1,4 +1,9 @@
 /* Canonical sidebar presentation, loaded after all page-specific styles. */
+.site-nav.unified-site-nav [data-staff-sign-out][hidden]{display:none!important}
+.site-nav.unified-site-nav [data-staff-sign-out]{display:block;box-sizing:border-box;width:100%;min-height:44px;margin-top:9px;padding:10px 12px;border:1px solid rgba(255,255,255,.45);border-radius:9px;background:rgba(255,255,255,.12);color:white;text-align:left;font:700 14px/1.3 system-ui,sans-serif;cursor:pointer}
+.site-nav.unified-site-nav [data-staff-sign-out]:hover{background:rgba(255,255,255,.22)}
+.site-nav.unified-site-nav [data-staff-sign-out]:focus-visible{outline:3px solid #f7bd3d;outline-offset:3px}
+.site-nav.unified-site-nav [data-staff-sign-out]:disabled{opacity:.7;cursor:wait}
 @media (min-width:901px){
  body.site-side-nav > header.site-nav.unified-site-nav{
   position:fixed!important;inset:0 auto 0 0!important;width:260px!important;height:100vh!important;
