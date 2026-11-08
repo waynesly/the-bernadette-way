@@ -11,3 +11,17 @@ button,.primary,.secondary,.nav-button{font-family:var(--font-body)!important}
 .primary:hover,.secondary:hover,.nav-button:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(14,55,94,.14)}
 input:focus,textarea:focus,select:focus{border-color:var(--sbcps-teal)!important;box-shadow:0 0 0 3px rgba(8,127,140,.12)!important;outline:0}
 @media(max-width:700px){.site-header{position:static}.site-header .header-inner{min-height:64px}}@media print{.printreport,.printreport *{font-family:var(--font-body)!important}.printreport h1,.printreport h2,.printreport h3{font-family:var(--font-display)!important}}
+
+/* Shared St Bernadette's sidebar */
+@media(min-width:901px){
+  .year5-page .site-header.year5-sidebar{background:var(--sbcps-navy);box-shadow:none}
+  .year5-page .site-header.year5-sidebar .school-brand{display:block;width:100%}
+  .year5-page .site-header.year5-sidebar .school-brand img{display:block;width:190px;height:auto}
+  .year5-page .site-header.year5-sidebar nav{width:100%;margin-top:auto}
+  .year5-page .site-header.year5-sidebar .nav-button{width:100%;margin:0;padding:14px 16px;text-align:left;border:1px solid rgba(255,255,255,.2);border-radius:12px}
+}
+.school-brand{display:flex;align-items:center;text-decoration:none}
+.school-brand img{display:block;width:min(230px,55vw);height:auto}
+@media(max-width:900px){
+  .year5-page .site-header.year5-sidebar .header-inner{justify-content:space-between}
+}
