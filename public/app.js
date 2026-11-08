@@ -267,7 +267,7 @@ function safariTextPdf(doc,pages,notify){
   const parts=[];
   const gather=n=>{
    if(n.tagName==='IMG'||n.tagName==='SVG'||n.tagName==='I'||n.tagName==='EM')return;
-   if(['P','H3','H4','B','STRONG','SPAN'].includes(n.tagName)&&!n.querySelector('p,h3,h4,b,strong,span')){const s=clean(n.textContent);if(s)parts.push({text:s,strong:['H3','H4','B','STRONG'].includes(n.tagName)});return}
+   if(['P','H3','H4','B','STRONG','SPAN'].includes(n.tagName)){const s=clean(n.textContent);if(s)parts.push({text:s,strong:['H3','H4','B','STRONG'].includes(n.tagName)});return}
    if(n.children.length===0){const s=clean(n.textContent);if(s)parts.push({text:s,strong:false});return}
    for(const c of n.children)gather(c);
   };
