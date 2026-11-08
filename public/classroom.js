@@ -37,6 +37,9 @@ const labels=["Not like me yet","A little like me","Sometimes like me","Mostly l
 const domainArt={belonging_friends:'belonging-v1',collaboration_communication:'collaboration-v1',learning_approach:'learning-approach-v1',confidence_voice:'confidence-voice-v1',self_regulation:'self-regulation-v2',contribution_leadership:'contribution-v1'};
 const windowArt={start_of_year:'start-year-v1',mid_year:'mid-year-v2',end_of_year:'reflection-v1'};
 let student,studentCode,attempts={},answers=[],questions=[],index=0,teacherClass,teacherData;
+/* Always open the check-in at its heading rather than Chrome's prior scroll position. */
+if ("scrollRestoration" in history) history.scrollRestoration="manual";
+window.addEventListener("load",()=>requestAnimationFrame(()=>window.scrollTo(0,0)));
 document.querySelectorAll(".nav").forEach(button=>button.onclick=()=>showView(button.dataset.view));
 document.querySelectorAll(".tab").forEach(button=>button.onclick=()=>showTeacherTab(button.dataset.teacherTab));
 $("joinForm").onsubmit=joinStudent;$("nextQuestion").onclick=nextQuestion;$("backQuestion").onclick=()=>{if(index){index--;renderQuestion()}};$("returnStudent").onclick=()=>showStudentSummary();
