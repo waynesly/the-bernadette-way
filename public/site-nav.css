@@ -26,6 +26,10 @@
  .site-nav .school-brand{max-width:100%}
  .site-nav .school-brand img{max-width:100%}
 }
+/* Catholic identity context in both student pathways */
+.faith-pathway-note{max-width:690px;margin:14px 0 22px;padding:14px 18px;border-left:4px solid #d7a638;border-radius:0 10px 10px 0;background:#fff9e9;color:#24465b;font-size:15px;line-height:1.55}
+.faith-pathway-note a{color:#075e73;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.faith-pathway-note a:focus-visible{outline:3px solid #d7a638;outline-offset:3px}
 /* Compact accessible navigation for tablet and mobile */
 .site-menu-toggle{display:none}
 @media(max-width:900px){
