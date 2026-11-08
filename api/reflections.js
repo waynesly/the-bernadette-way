@@ -40,6 +40,6 @@ export default async function(req,res) {
   const learned = text(body.learned,1500);
   const futureGoal = text(body.futureGoal,1500);
   if (!strengthId || !howUsed || !whatHappened || !impact || !learned || !futureGoal) return res.status(400).json({error:"Complete every reflection prompt before saving."});
-  const {rows} = await db.query("INSERT INTO student_reflections (resume_token_hash,strength_id,how_used,what_happened,impact_on_others,learned,future_goal,selected_for_report) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id,created_at",[tokenHash,strengthId,howUsed,whatHappened,impact,learned,futureGoal,Boolean(body.selectedForReport)]);
+  const {rows} = await db.query("INSERT INTO student_reflections (resume_token_hash,strength_id,how_used,what_happened,impact_on_others,learned,future_goal,selected_for_report) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id,created_at",[tokenHash,strengthId,howUsed,whatHappened,impact,learned,futureGoal,true]);
   res.json({ok:true,reflection:rows[0]});
 }
