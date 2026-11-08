@@ -321,6 +321,144 @@ function safariTextPdf(doc,pages,notify){
   doc.text(i+' / '+total,right,288,{align:'right'});
  }
 }
+async function safariDesignedPdf(doc,pages,notify){
+ const C={navy:[19,45,81],teal:[8,115,125],gold:[247,195,77],red:[224,48,84],ink:[26,50,77],muted:[92,111,122],pale:[249,250,249]};
+ const clean=s=>String(s||'').replace(/[\u{1F000}-\u{1FFFF}]/gu,'').replace(/[\u2600-\u27BF]/g,'').replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/[\u2013\u2014]/g,'-').replace(/\u2026/g,'...').replace(/[^\x20-\x7E\u00C0-\u00FF]/g,'').replace(/\s+/g,' ').trim();
+ const paint=(rgb)=>doc.setTextColor(...rgb);
+ const fill=(rgb)=>doc.setFillColor(...rgb);
+ const rect=(x,y,w,h,color,r=2)=>{fill(color);doc.roundedRect(x,y,w,h,r,r,'F')};
+ const text=(s,x,y,size=9,bold=false,color=C.ink,max=170)=>{
+  const val=clean(s);if(!val)return y;
+  doc.setFont('helvetica',bold?'bold':'normal');doc.setFontSize(size);paint(color);
+  const lines=doc.splitTextToSize(val,max);
+  const leading=size*.43+1.1;
+  for(const ln of lines){doc.text(ln,x,y);y+=leading}
+  return y;
+ };
+ const cache=new Map();
+ const img=async(el,x,y,w,h)=>{
+  if(!el?.src)return;
+  try{
+   let data=cache.get(el.src);
+   if(!data){const response=await fetch(el.src,{credentials:'same-origin'});if(!response.ok)return;const blob=await response.blob();data=await new Promise((resolve,reject)=>{const fr=new FileReader();fr.onload=()=>resolve(fr.result);fr.onerror=reject;fr.readAsDataURL(blob)});cache.set(el.src,data)}
+   const type=data.slice(0,40).includes('jpeg')?'JPEG':data.slice(0,40).includes('webp')?'WEBP':'PNG';
+   doc.addImage(data,type,x,y,w,h,undefined,'FAST');
+  }catch(error){console.warn('[PDF design] Image skipped',error?.message)}
+ };
+ let pageNum=0;
+ const start=async(section)=>{
+  if(pageNum++)doc.addPage();
+  fill(C.red);doc.rect(14,27,29,1.8,'F');fill(C.gold);doc.rect(43,27,38,1.8,'F');fill(C.navy);doc.rect(81,27,115,1.8,'F');
+  const logo=pages[0].querySelector('.report-logo');
+  await img(logo,14,10,41,13);
+  text('THE BERNADETTE WAY  |  '+section.toUpperCase(),60,18,7,true,C.teal,132);
+ };
+ const footer=()=>{
+  rect(14,269,182,8,[255,244,217],0);
+  text('Private strengths reflection  |  Every strength can grow with practice.',17,274,7,false,C.muted);
+ };
+ const title=(kicker,heading,description)=>{
+  text(kicker.toUpperCase(),14,38,8,true,C.teal);
+  let y=text(heading,14,49,18,true,C.navy,182);
+  if(description)y=text(description,14,y+1,8,false,C.muted,181);
+  return y+4;
+ };
+ const detail=(article)=>{
+  const h=article.querySelector('h3')?.textContent||'';
+  const tag=article.querySelector('span')?.textContent||'';
+  const ps=[...article.querySelectorAll('p')].map(p=>clean(p.textContent));
+  return {name:h,tag,ps,img:article.querySelector('img')};
+ };
+ const detailCard=async(d,x,y,w,h,bg)=>{
+  rect(x,y,w,h,bg,3);
+  await img(d.img,x+4,y+4,13,13);
+  text(d.tag,x+20,y+7,7,true,C.teal,w-24);
+  text(d.name,x+20,y+13,11,true,C.navy,w-24);
+  doc.setDrawColor(219,230,230);doc.line(x+4,y+20,x+w-4,y+20);
+  let cy=y+26;
+  for(const para of d.ps){
+   if(cy>y+h-5)break;
+   cy=text(para,x+5,cy,7.4,false,C.ink,w-10)+1.3;
+  }
+ };
+ const articles=(page,selector)=>[...page.querySelectorAll(selector)].map(detail);
+ const makeDetails=async(page,selector,colors)=>{
+  const ds=articles(page,selector);let y=66;
+  for(let i=0;i<ds.length;i++){
+   const last=ds.length%2&&i===ds.length-1;
+   const w=last?182:88,x=last?14:14+(i%2)*94;
+   if(i>0&&i%2===0)y+=59;
+   await detailCard(ds[i],x,y,w,57,colors[i%colors.length]);
+  }
+  return y+65;
+ };
+ const pastels=[[244,241,253],[255,241,241],[231,249,241],[255,248,233],[236,243,255]];
+ const intro=pages[0],isFamily=intro.classList.contains('family-profile-report');
+ // Page 1 - branded overview and original compact five-card grid.
+ await start(isFamily?'Family guide | Year 5':'Year 5');
+ const hero=intro.querySelector('.student-report-hero');
+ let y=title(isFamily?'A strengths conversation at home':'Lead with heart',hero?.querySelector('h2')?.textContent||'Strengths profile',hero?.querySelector('p:not(.report-kicker)')?.textContent);
+ rect(14,y,182,37,isFamily?[235,249,247]:[234,249,242],4);
+ const heroImg=hero?.querySelector('img');await img(heroImg,169,y+3,24,24);
+ let hy=y+9;for(const p of [...(intro.querySelector('.family-leadership,.report-leadership')?.querySelectorAll('h3,p')||[])].slice(0,4)){hy=text(p.textContent,19,hy,p.tagName==='H3'?10:7,p.tagName==='H3',C.navy,144)+1}
+ y+=44;
+ text(isFamily?'Strengths that stood out today':'My top five strengths',14,y,12,true,C.navy);y+=5;
+ const five=[...intro.querySelectorAll('.profile-top-five article')];
+ for(let i=0;i<five.length;i++){
+  const x=14+i*37,w=35;
+  rect(x,y,w,37,pastels[i],2);
+  await img(five[i].querySelector('img'),x+12,y+2,11,11);
+  text('STRENGTH 0'+(i+1),x+2,y+17,5.8,true,C.teal,w-4);
+  text(five[i].querySelector('b')?.textContent,x+2,y+23,7.3,true,C.navy,w-4);
+  text(five[i].querySelector('strong')?.textContent,x+2,y+29,7.2,true,C.teal,w-4);
+ }
+ y+=45;
+ if(!isFamily){
+  const story=intro.querySelector('.report-leadership');
+  rect(14,y,182,30,C.navy,3);
+  let sy=y+7;for(const el of [...(story?.querySelectorAll('h3,p')||[])].slice(0,3))sy=text(el.textContent,19,sy,el.tagName==='H3'?10:7,el.tagName==='H3',[255,255,255],171)+1;
+  y+=36;
+  text('My whole strengths picture',14,y,11,true,C.navy);y+=7;
+  const scores=[...intro.querySelectorAll('.profile-score-chart > div')];
+  for(let i=0;i<scores.length;i++){
+   const col=i%2,row=Math.floor(i/2),x=14+col*93,cy=y+row*5.2;
+   const name=clean(scores[i].querySelector('b')?.textContent),score=clean(scores[i].querySelector('strong')?.textContent);
+   text(name,x,cy,6.7,true,C.ink,39);
+   rect(x+40,cy-2.5,33,1.8,[228,236,237],0.5);
+   const val=Number(score.match(/\d+/)?.[0]||0);
+   rect(x+40,cy-2.5,33*val/20,1.8,i%3===0?[121,93,180]:i%3===1?[194,100,138]:C.teal,0.5);
+   text(score,x+75,cy,6,false,C.muted,17);
+  }
+ }else{
+  const prompt=intro.querySelector('.family-conversation');
+  rect(14,y,182,24,[255,245,220],3);
+  let py=text('A good conversation starter',18,y+8,10,true,C.navy,170);
+  for(const p of [...(prompt?.querySelectorAll('p')||[])].slice(0,2))py=text(p.textContent,18,py+1,7,false,C.ink,170);
+ }
+ footer();notify('Designed PDF page 1...');
+ // Page 2 - 2-column illustrated detailed strength cards.
+ await start(isFamily?'Family guide | Top strengths':'Year 5 | Top strengths');
+ const detailPage=pages[1];
+ title('A closer look',detailPage.querySelector('h2')?.textContent||'Strengths in action',detailPage.querySelector('.chart-intro')?.textContent);
+ await makeDetails(detailPage,isFamily?'.family-strength-detail':'.student-strength-detail',isFamily?[[249,251,251]]:pastels);
+ const action=detailPage.querySelector('.student-detail-action');
+ if(action){rect(14,247,182,16,C.navy,3);let ay=text('YOUR YEAR 6 IDEA',19,252,7,true,C.gold,170);text(action.querySelector('p:last-child')?.textContent,19,ay+1,8,false,[255,255,255],169)}
+ footer();notify('Designed PDF page 2...');
+ // Page 3 - three growth cards.
+ await start(isFamily?'Family guide | Growth':'Year 5 | Growth');
+ const growth=pages[2];title('Room to grow',growth.querySelector('h2')?.textContent||'Strengths to practise',growth.querySelector('.chart-intro')?.textContent);
+ const gs=articles(growth,'.growth-strength-card');
+ for(let i=0;i<gs.length;i++)await detailCard(gs[i],14+i*62,73,58,95,[250,251,247]);
+ footer();notify('Designed PDF page 3...');
+ // Additional pages only when saved leadership reflections exist.
+ for(let i=3;i<pages.length;i++){
+  await start('Leadership journal | Reflection '+(i-2));
+  const page=pages[i];let ry=title('My leadership journal',page.querySelector('h2')?.textContent||'Saved reflection','A record of strengths in action');
+  for(const p of page.querySelectorAll('p')){if(ry>255){footer();await start('Leadership journal | Continued');ry=43}ry=text(p.textContent,17,ry+2,9,false,C.ink,175)+3}
+  footer();
+ }
+}
+
 async function downloadPdf(markup,studentOnly=false,fileName='strengths-profile.pdf'){
  const area=$('printArea'),status=$('pdfDownloadStatus');
  const notify=message=>{if(status){status.hidden=false;status.textContent=message;}};
@@ -335,7 +473,7 @@ async function downloadPdf(markup,studentOnly=false,fileName='strengths-profile.
   if(!pages.length)throw Error('No PDF pages were rendered');
   if(isSafariPrint()){
    console.info('[PDF diagnostic] Using native jsPDF text layout to avoid Safari blank canvas capture',{pages:pages.length});
-   safariTextPdf(doc,pages,notify);
+   await safariDesignedPdf(doc,pages,notify);
   }else for(let index=0;index<pages.length;index++){
    notify('Rendering PDF page '+(index+1)+' of '+pages.length+'…');
    const page=pages[index],started=performance.now(),rect=page.getBoundingClientRect(),pageImages=[...page.querySelectorAll('img')];
