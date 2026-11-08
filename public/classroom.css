@@ -82,9 +82,9 @@ footer{background:#EAF1F5;color:#466176}
 /* Full-screen Classroom Check-in welcome */
 body.site-side-nav main:has(.hero-immersive){max-width:none;padding:0}
 .hero.hero-immersive{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(330px,.72fr);gap:clamp(32px,6vw,96px);align-items:center;min-height:100vh;margin:0;padding:clamp(56px,9vw,130px) clamp(36px,8vw,132px);overflow:hidden;background:#edf2ec}
-.hero.hero-immersive:before{content:"";position:absolute;z-index:-2;inset:0;background:url("/assets/classroom-checkin-photo-hero-v1.jpg") center/cover no-repeat}
-.hero.hero-immersive:after{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,rgba(255,252,247,.98) 0%,rgba(255,252,247,.93) 34%,rgba(255,252,247,.56) 58%,rgba(255,252,247,.16) 100%)}
-.hero-immersive .hero-copy{max-width:760px}
+.hero.hero-immersive:before{content:"";position:absolute;z-index:0;inset:0;background:url("/assets/classroom-checkin-photo-hero-v1.jpg") center/cover no-repeat}
+.hero.hero-immersive:after{content:"";position:absolute;z-index:1;inset:0;background:linear-gradient(90deg,rgba(255,252,247,.98) 0%,rgba(255,252,247,.93) 34%,rgba(255,252,247,.56) 58%,rgba(255,252,247,.16) 100%)}
+.hero.hero-immersive>.hero-copy{position:relative;z-index:2}.hero-immersive .hero-copy{max-width:760px}
 .hero-immersive .lead{color:#405e70;text-shadow:0 1px 0 rgba(255,255,255,.45)}
 .hero-immersive .pill-row span{background:rgba(229,247,238,.9);box-shadow:0 1px 0 rgba(255,255,255,.7)}
 .hero-immersive .hero-side{display:block}
