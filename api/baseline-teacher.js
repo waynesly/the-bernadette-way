@@ -22,6 +22,7 @@ async function classData(classroom){
   return {classroom:{id:classroom.id,class_name:classroom.class_name,calendar_year:classroom.calendar_year,current_window:classroom.current_window},students:Object.values(students)};
 }
 export default async function(req,res){
+ res.setHeader("Cache-Control","no-store");
   if(!await requireTeacher(req,res))return;
   res.setHeader("Cache-Control","no-store");
   const body=req.body||{};

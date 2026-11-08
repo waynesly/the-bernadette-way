@@ -7,6 +7,7 @@ function code(value){return String(value||"").trim().toUpperCase()}
 async function authorised(req,res){if(!await verifyToken(req)){res.status(401).json({error:"Teacher password required."});return false}return true}
 async function rosterForAccess(id,accessCode){if(!/^[a-f0-9-]{36}$/i.test(String(id||""))||!validCode(accessCode))return null;const {rows}=await db.query("SELECT id,class_name FROM year5_rosters WHERE id=$1 AND access_code_hash=$2 LIMIT 1",[id,await hash(accessCode)]);return rows[0]||null}
 export default async function(req,res){
+ res.setHeader("Cache-Control","no-store");
  if(!await authorised(req,res))return;res.setHeader("Cache-Control","no-store");const body=req.body||{};
  if(body.action==="create"){
    const className=cleanText(body.className,80),names=[...new Set((Array.isArray(body.students)?body.students:[]).map(name=>cleanText(name,100)).filter(Boolean))];
