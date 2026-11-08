@@ -3,7 +3,7 @@
 const links=[
 ['THE BERNADETTE WAY',[['Home','/'],['Our Patron & Purpose','/our-patron.html']]],
 ['STUDENT PATHWAYS',[['My Gifts, My Growth · Years 3–6','/classroom.html'],['Lead with Heart · Year 5','/year5.html']]],
-['TEACHER WORKSPACE',[['Teacher studios','/teacher-studios.html'],['Year 5 roster and join codes','/year5-roster.html'],['Set up a class','/teacher-setup.html'],['Teaching guides','/teacher-guides.html'],['Private reflection journal','/staff-reflection.html']]],
+['TEACHER WORKSPACE',[['Teacher studios','/teacher-studios.html'],['Set up a class','/teacher-setup.html'],['Teaching guides','/teacher-guides.html'],['Private reflection journal','/staff-reflection.html']]],
 ['RESOURCES',[['Move Up Day','/move-up-day.html'],['Implementation evidence','/implementation-evidence.html'],['Development roadmap','/development-roadmap.html']]]
 ];
 const brand='<a class="school-brand" href="/" aria-label="The Bernadette Way home"><img src="/assets/brand/stbernadettes-horizontal-reverse.png" alt="St Bernadette’s Catholic Primary School"></a>';
@@ -11,7 +11,7 @@ const current=location.pathname;
 function makeNav(){
 const nav=document.createElement('nav');nav.className='site-nav-links';nav.setAttribute('aria-label','Primary navigation');
 links.forEach(([heading,items])=>{const group=document.createElement('div');group.className='site-nav-group';const label=document.createElement('span');label.className='site-nav-section';label.textContent=heading;group.append(label);items.forEach(([name,url])=>{const a=document.createElement('a');a.href=url;a.textContent=name;if(current===url||(current==='/index.html'&&url==='/'))a.setAttribute('aria-current','page');group.append(a)});nav.append(group)});
-const admin=document.createElement('a');admin.href='/administration.html';admin.textContent='Administration';admin.setAttribute('data-admin-nav','');admin.hidden=true;if(current==='/administration.html')admin.setAttribute('aria-current','page');nav.querySelectorAll('.site-nav-group')[2].append(admin);
+const admin=document.createElement('a');admin.href='/administration.html';admin.textContent='Administrator sign-in';admin.setAttribute('data-admin-nav','');if(current==='/administration.html')admin.setAttribute('aria-current','page');nav.querySelectorAll('.site-nav-group')[2].append(admin);
 return nav;
 }
 function boot(){
@@ -30,7 +30,7 @@ button.addEventListener('click',()=>{const open=nav.classList.toggle('is-open');
 nav.addEventListener('click',e=>{if(e.target.closest('a'))close()});header.addEventListener('keydown',e=>{if(e.key==='Escape'){close();button.focus()}});document.addEventListener('click',e=>{if(!header.contains(e.target))close()});
 window.matchMedia('(min-width:901px)').addEventListener('change',e=>{if(e.matches)close()});
 const token=sessionStorage.getItem('bernadette.staff.session');
-fetch('/api/staff-journal',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'whoami',...(token?{sessionToken:token}:{})}),cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{if(d?.user?.role==='admin')nav.querySelector('[data-admin-nav]').hidden=false}).catch(()=>{});
+fetch('/api/staff-journal',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'whoami',...(token?{sessionToken:token}:{})}),cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{if(d?.user?.role==='admin')nav.querySelector('[data-admin-nav]').textContent='Administration'}).catch(()=>{});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
