@@ -243,7 +243,28 @@ async function downloadPdf(markup,studentOnly=false,fileName='strengths-profile.
   if(!pages.length)throw Error('No PDF pages were rendered');
   for(let index=0;index<pages.length;index++){
    notify('Rendering PDF page '+(index+1)+' of '+pages.length+'…');
-   const canvas=await timeout(window.html2canvas(pages[index],{scale:isSafariPrint()?0.75:1,backgroundColor:'#ffffff',useCORS:true,logging:false,windowWidth:980,imageTimeout:5000,removeContainer:true}),25000,'PDF page '+(index+1));
+   const page=pages[index],started=performance.now(),rect=page.getBoundingClientRect(),pageImages=[...page.querySelectorAll('img')];
+   const diagnostics={page:index+1,dimensions:{width:Math.round(rect.width),height:Math.round(rect.height)},images:pageImages.map(img=>({loaded:img.complete&&img.naturalWidth>0,width:img.naturalWidth,height:img.naturalHeight})),safari:isSafariPrint()};
+   console.info('[PDF diagnostic] Starting capture',diagnostics);
+   let canvas;
+   try{
+    canvas=await timeout(window.html2canvas(page,{scale:isSafariPrint()?0.75:1,backgroundColor:'#ffffff',useCORS:true,logging:false,windowWidth:980,imageTimeout:5000,removeContainer:true}),25000,'PDF page '+(index+1));
+   }catch(captureError){
+    console.error('[PDF diagnostic] Capture failed after '+Math.round(performance.now()-started)+'ms',diagnostics,captureError);
+    if(isSafariPrint()&&index===0){
+     notify('Safari is checking whether report images caused the timeout…');
+     const imageElements=[...page.querySelectorAll('img')],previous=imageElements.map(img=>img.style.visibility);
+     imageElements.forEach(img=>{img.style.visibility='hidden'});
+     try{
+      const retryStart=performance.now();
+      canvas=await timeout(window.html2canvas(page,{scale:0.65,backgroundColor:'#ffffff',useCORS:false,logging:false,windowWidth:980,imageTimeout:1000,removeContainer:true}),12000,'Image-free PDF page '+(index+1));
+      console.info('[PDF diagnostic] Image-free capture succeeded in '+Math.round(performance.now()-retryStart)+'ms');
+      notify('Safari rendered page 1 without images; continuing export…');
+     }catch(retryError){console.error('[PDF diagnostic] Image-free capture also failed',retryError);throw captureError}
+     finally{imageElements.forEach((img,i)=>{img.style.visibility=previous[i]})}
+    }else throw captureError;
+   }
+   console.info('[PDF diagnostic] Capture completed', {page:index+1,elapsedMs:Math.round(performance.now()-started),canvasWidth:canvas.width,canvasHeight:canvas.height});
    if(!canvas.width||!canvas.height)throw Error('PDF page could not be captured');
    if(index)doc.addPage();
    doc.addImage(canvas.toDataURL('image/jpeg',0.8),'JPEG',10,10,190,277,undefined,'FAST');
