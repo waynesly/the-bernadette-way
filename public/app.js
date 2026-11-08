@@ -387,8 +387,8 @@ async function safariDesignedPdf(doc,pages,notify){
   for(let i=0;i<ds.length;i++){
    const last=ds.length%2&&i===ds.length-1;
    const w=last?182:88,x=last?14:14+(i%2)*94;
-   if(i>0&&i%2===0)y+=59;
-   await detailCard(ds[i],x,y,w,57,colors[i%colors.length]);
+   if(i>0&&i%2===0)y+=66;
+   await detailCard(ds[i],x,y,w,63,colors[i%colors.length]);
   }
   return y+65;
  };
@@ -398,10 +398,10 @@ async function safariDesignedPdf(doc,pages,notify){
  await start(isFamily?'Family guide | Year 5':'Year 5');
  const hero=intro.querySelector('.student-report-hero');
  let y=title(isFamily?'A strengths conversation at home':'Lead with heart',hero?.querySelector('h2')?.textContent||'Strengths profile',hero?.querySelector('p:not(.report-kicker)')?.textContent);
- rect(14,y,182,37,isFamily?[235,249,247]:[234,249,242],4);
+ rect(14,y,182,isFamily?49:31,isFamily?[235,249,247]:[234,249,242],4);
  const heroImg=hero?.querySelector('img');await img(heroImg,169,y+3,24,24);
- let hy=y+9;for(const p of [...(intro.querySelector('.family-leadership,.report-leadership')?.querySelectorAll('h3,p')||[])].slice(0,4)){hy=text(p.textContent,19,hy,p.tagName==='H3'?10:7,p.tagName==='H3',C.navy,144)+1}
- y+=44;
+ let hy=y+9;if(isFamily){for(const p of [...(intro.querySelector('.family-leadership')?.querySelectorAll('h3,p')||[])].slice(0,5)){hy=text(p.textContent,19,hy,p.tagName==='H3'?9:7,p.tagName==='H3',C.navy,144)+1}}else{hy=text('Every strength has room to grow. Discover your gifts, grow your strengths and share your light.',19,hy,9,false,C.navy,142)}
+ y+=isFamily?56:38;
  text(isFamily?'Strengths that stood out today':'My top five strengths',14,y,12,true,C.navy);y+=5;
  const five=[...intro.querySelectorAll('.profile-top-five article')];
  for(let i=0;i<five.length;i++){
