@@ -1,0 +1,7 @@
+ALTER TABLE classroom_baseline_classes ALTER COLUMN current_window SET DEFAULT 'move_up_day';
+ALTER TABLE classroom_baseline_classes DROP CONSTRAINT IF EXISTS classroom_baseline_classes_current_window_check;
+ALTER TABLE classroom_baseline_classes ADD CONSTRAINT classroom_baseline_classes_current_window_check CHECK (current_window IN ('start_of_year','mid_year','end_of_year','move_up_day','term_1_beginning','term_1_mid','term_2_beginning','term_2_mid','term_3_beginning','term_3_mid','term_4_beginning','term_4_mid'));
+ALTER TABLE classroom_baseline_attempts DROP CONSTRAINT IF EXISTS classroom_baseline_attempts_assessment_window_check;
+ALTER TABLE classroom_baseline_attempts ADD CONSTRAINT classroom_baseline_attempts_assessment_window_check CHECK (assessment_window IN ('start_of_year','mid_year','end_of_year','move_up_day','term_1_beginning','term_1_mid','term_2_beginning','term_2_mid','term_3_beginning','term_3_mid','term_4_beginning','term_4_mid'));
+ALTER TABLE classroom_baseline_observations DROP CONSTRAINT IF EXISTS classroom_baseline_observations_assessment_window_check;
+ALTER TABLE classroom_baseline_observations ADD CONSTRAINT classroom_baseline_observations_assessment_window_check CHECK (assessment_window IN ('start_of_year','mid_year','end_of_year','move_up_day','term_1_beginning','term_1_mid','term_2_beginning','term_2_mid','term_3_beginning','term_3_mid','term_4_beginning','term_4_mid'));
