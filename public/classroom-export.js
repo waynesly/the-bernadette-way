@@ -8,9 +8,12 @@
     return download('<article class="brand-report classroom-report-page pdf-page"><header class="pdf-report-brand"><img src="'+logo+'" alt=""><span>THE BERNADETTE WAY · CLASSROOM CHECK-IN</span></header><section class="classroom-report-hero"><div><p>'+safe(subtitle)+'</p><h1>'+safe(title)+'</h1><span>Private teaching conversation · strengths can grow with practice.</span></div><img src="'+safe(art)+'" alt=""></section><main class="classroom-report-content">'+body+'</main><footer>St Bernadette’s Catholic Primary School · The Bernadette Way</footer></article>',fileName);
   };
   window.printCodes=function(){
-    const people=(teacherClass?.roster?.students||teacherData?.students||[]).filter(person=>person.join_code);
-    if(!people.length)return alert("Open a class with student codes before downloading join cards.");
-    const className=teacherData?.classroom?.class_name||teacherClass?.roster?.class_name||"Classroom";
+    const roster=Array.isArray(teacherClass?.roster)?teacherClass.roster:Array.isArray(teacherClass?.roster?.students)?teacherClass.roster.students:[];
+    const activeClassId=teacherData?.classroom?.id;
+    const people=(teacherClass?.classId&&activeClassId&&String(teacherClass.classId)===String(activeClassId)?roster:[]).filter(person=>person&&person.join_code&&person.display_name);
+    if(!people.length)return alert("Student join codes are not available for this class on this device. Codes are shown when a class is first created and cannot be recovered from the securely stored hashes. Please use the original join cards; do not recreate the class or delete student records.");
+    if(!window.SosPdf?.download)return alert("The PDF generator has not loaded. Refresh this page and try again.");
+    const className=teacherData?.classroom?.class_name||"Classroom";
     const markup=cards(people,4).map(group=>'<article class="join-card-sheet pdf-page"><header class="pdf-report-brand"><img src="'+logo+'" alt=""><span>CLASSROOM STRENGTHS CHECK-IN</span></header><h1>'+safe(className)+' — student join cards</h1><p class="pdf-intro">Cut along the dotted lines and give each student only their card.</p><div class="join-card-grid">'+group.map(person=>'<section class="code-card"><img class="join-card-logo" src="'+logo+'" alt=""><p class="card-kicker">CLASSROOM STRENGTHS CHECK-IN</p><h2>'+safe(person.display_name)+'</h2><p class="card-prompt">Go to <b>'+location.host+'/classroom.html</b> and enter your private code.</p><code>'+safe(person.join_code)+'</code><p class="card-note">Keep this card private.</p></section>').join("")+'</div><footer>Private educational reflection · Keep every code private.</footer></article>').join("");
     return download(markup,className+"-classroom-join-cards");
   };
