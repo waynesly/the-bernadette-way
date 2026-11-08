@@ -52,3 +52,17 @@ footer{background:#EAF1F5;color:#466176}
 @media print{.print-sheet,.brand-report{font-family:var(--font-body)!important}.print-sheet h1,.print-sheet h2,.print-sheet h3{font-family:var(--font-display)!important}}
 /* The welcome composition uses copy and the sign-in card as its two primary columns. */
 .hero>#joinScreen{} .hero>.window-journey-art{display:none}
+
+/* Shared St Bernadette's sidebar */
+@media(min-width:901px){
+  body.site-side-nav>header.classroom-header{background:var(--sbcps-navy);box-shadow:none}
+  body.site-side-nav>header.classroom-header .school-brand{display:block;width:100%}
+  body.site-side-nav>header.classroom-header .school-brand img{display:block;width:190px;height:auto}
+  body.site-side-nav>header.classroom-header nav{padding-bottom:4px}
+  body.site-side-nav>header.classroom-header .nav{color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:12px}
+  body.site-side-nav>header.classroom-header .nav:hover,body.site-side-nav>header.classroom-header .nav.active{background:#fff;color:var(--sbcps-navy);border-color:#fff}
+}
+@media(max-width:900px){
+  .classroom-header .school-brand{display:block}
+  .classroom-header .school-brand img{display:block;width:min(230px,55vw);height:auto}
+}
