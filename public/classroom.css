@@ -66,3 +66,10 @@ footer{background:#EAF1F5;color:#466176}
   .classroom-header .school-brand{display:block}
   .classroom-header .school-brand img{display:block;width:min(230px,55vw);height:auto}
 }
+.class-list{display:grid;gap:10px;margin-top:22px}
+.class-choice{display:flex;align-items:center;justify-content:space-between;gap:18px;width:100%;padding:16px 18px;border:1px solid var(--sbcps-line);border-radius:12px;background:#fff;color:var(--sbcps-navy);font:inherit;text-align:left;cursor:pointer}
+.class-choice:hover{border-color:var(--sbcps-teal);background:#f4fbfa}
+.class-choice b,.class-choice small{display:block}
+.class-choice b{font-size:18px}
+.class-choice small{margin-top:2px;color:var(--sbcps-muted)}
+.class-choice>span:last-child{font-weight:700;white-space:nowrap}
