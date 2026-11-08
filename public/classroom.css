@@ -95,3 +95,22 @@ body.site-side-nav main:has(.hero-immersive){max-width:none;padding:0}
   .hero.hero-immersive:after{background:linear-gradient(180deg,rgba(255,252,247,.96) 0%,rgba(255,252,247,.88) 56%,rgba(255,252,247,.74) 100%)}
   .hero-immersive .join-card{max-width:520px;margin:0}
 }
+
+/* Keep the complete welcome journey in one desktop viewport, with the footer still visible. */
+@media(min-width:901px){
+  body.site-side-nav main:has(.hero-immersive){min-height:calc(100svh - 94px)}
+  .hero.hero-immersive{
+    min-height:calc(100svh - 94px);
+    padding-block:clamp(24px,4vh,64px);
+    align-items:center;
+  }
+  .hero-immersive .hero-copy{max-width:720px}
+  .hero-immersive h1{font-size:clamp(48px,4.4vw,74px);line-height:.98;margin-block:12px 20px}
+  .hero-immersive .lead{margin-block:0 20px;font-size:clamp(18px,1.45vw,24px)}
+  .hero-immersive .pill-row{gap:10px}
+  .hero-immersive .pill-row span{padding:10px 14px}
+  .hero-immersive .join-card{margin-top:20px;padding:clamp(22px,2.3vh,32px)}
+  .hero-immersive .join-card h2{margin:4px 0 16px}
+  .hero-immersive .join-card label{gap:7px}
+  .hero-immersive .join-card small{display:block;margin-top:18px}
+}
