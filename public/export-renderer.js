@@ -1,6 +1,6 @@
 (function(){
   const A4={width:210,height:297,margin:10};
-  const escapeFileName=name=>String(name||"science-of-strengths").replace(/[^a-z0-9._-]+/gi,"-").replace(/-+/g,"-").replace(/^-|-$/g,"");
+  const escapeFileName=name=>String(name||"the-bernadette-way").replace(/[^a-z0-9._-]+/gi,"-").replace(/-+/g,"-").replace(/^-|-$/g,"");
   const waitForImages=async root=>{
     const images=[...root.querySelectorAll("img")];
     await Promise.race([
