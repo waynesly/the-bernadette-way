@@ -1,4 +1,4 @@
 import {revokeToken} from "lib/teacher-auth.js";
-export const access="public";
-export const methods=["POST"];
-export default async function(req,res){await revokeToken(req);res.cookie("strength_teacher","",{httpOnly:true,secure:true,sameSite:"strict",path:"/",maxAge:0});res.json({ok:true})}
+import {db} from "hatchable";
+export const access="public";export const methods=["POST"];
+export default async function(req,res){await revokeToken(req);const raw=String(req.headers.cookie||"").split(";").map(s=>s.trim()).find(s=>s.startsWith("staff_journal="));const token=raw?.slice(14)||"";if(/^[a-f0-9]{64}$/.test(token)){const bytes=new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(token)));const hash=[...bytes].map(b=>b.toString(16).padStart(2,"0")).join("");await db.query("DELETE FROM staff_journal_sessions WHERE token_hash=$1",[hash])}for(const name of ["strength_teacher","staff_journal"])res.cookie(name,"",{httpOnly:true,secure:true,sameSite:"strict",path:"/",maxAge:0});res.json({ok:true})}

@@ -1,5 +1,5 @@
 import {db} from "hatchable";
-import {verifyToken,signToken,revokeToken} from "lib/teacher-auth.js";
+import {revokeToken} from "lib/teacher-auth.js";
 export const access="public";export const methods=["GET","POST"];
 const enc=new TextEncoder();
 async function hash(s){return [...new Uint8Array(await crypto.subtle.digest("SHA-256",enc.encode(s)))].map(b=>b.toString(16).padStart(2,"0")).join("")}
@@ -13,7 +13,7 @@ if(action==="register")return res.status(403).json({error:"Staff accounts are ma
 if(action==="login"){
  const ip=String(req.headers["cf-connecting-ip"]||req.headers["x-forwarded-for"]||"unknown").split(",")[0].trim().slice(0,100);const attempts=await db.query("SELECT COUNT(*)::int AS n FROM staff_journal_login_attempts WHERE client_ip=$1 AND created_at>now()-interval '15 minutes'",[ip]);if(attempts.rows[0].n>=10)return res.status(429).json({error:"Too many sign-in attempts. Try again later."});
  const username=clean(b.username,60).toLowerCase(),password=String(b.password||"");const {rows}=await db.query("SELECT id,username,display_name,role,salt,password_hash,must_change_password,disabled FROM staff_journal_accounts WHERE username=$1",[username]);const user=rows[0];if(!user||user.disabled||password.length>200||await passwordHash(password,user.salt)!==user.password_hash){await db.query("INSERT INTO staff_journal_login_attempts(client_ip) VALUES($1)",[ip]);return res.status(401).json({error:"Invalid staff journal credentials."})}await db.query("DELETE FROM staff_journal_login_attempts WHERE client_ip=$1",[ip]);
- const token=crypto.randomUUID().replaceAll("-","")+crypto.randomUUID().replaceAll("-");await db.query("INSERT INTO staff_journal_sessions(token_hash,account_id,expires_at) VALUES($1,$2,now()+interval '4 hours')",[await hash(token),user.id]);setCookie(res,token,14400000);if(user.role==="admin"&&!user.must_change_password)res.cookie("strength_teacher",await signToken(),{httpOnly:true,secure:true,sameSite:"strict",path:"/",maxAge:14400000});return res.json({ok:true,must_change_password:user.must_change_password,user:{username:user.username,display_name:user.display_name,role:user.role}});
+ const token=crypto.randomUUID().replaceAll("-","")+crypto.randomUUID().replaceAll("-");await db.query("INSERT INTO staff_journal_sessions(token_hash,account_id,expires_at) VALUES($1,$2,now()+interval '4 hours')",[await hash(token),user.id]);setCookie(res,token,14400000);/* All teacher sections use this individual account session. */return res.json({ok:true,must_change_password:user.must_change_password,user:{username:user.username,display_name:user.display_name,role:user.role}});
 }
 if(action==="logout"){const existing=await account(req);if(existing?.role==="admin"){await revokeToken(req);res.cookie("strength_teacher","",{httpOnly:true,secure:true,sameSite:"strict",path:"/",maxAge:0})}const token=cookie(req);if(/^[a-f0-9]{64}$/.test(token))await db.query("DELETE FROM staff_journal_sessions WHERE token_hash=$1",[await hash(token)]);setCookie(res,"",0);return res.json({ok:true})}
 const user=await account(req);if(!user)return res.status(401).json({error:"Individual staff journal sign-in required."});
