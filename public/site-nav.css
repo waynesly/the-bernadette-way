@@ -1,4 +1,7 @@
 /* Shared navigation for The Bernadette Way */
+/* Keep school and student pathways at the top; anchor staff access to the bottom. */
+@media(min-width:901px){.site-nav.unified-site-nav .site-nav-links{display:flex;flex-direction:column;flex:1;min-height:0;margin-top:0!important}.site-nav.unified-site-nav [data-staff-access]{margin-top:auto;padding-top:20px}}
+@media(max-width:900px){.site-nav.unified-site-nav [data-staff-access]{order:99;width:100%;margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.22)}}
 .site-nav .site-nav-group[hidden]{display:none!important}
 .site-nav [data-staff-access] [hidden]{display:none!important}
 /* Consolidated navigation groups; one shared menu across all pages. */
