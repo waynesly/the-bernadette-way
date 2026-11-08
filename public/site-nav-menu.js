@@ -10,8 +10,8 @@ const brand='<a class="school-brand" href="/" aria-label="The Bernadette Way hom
 const current=location.pathname;
 function makeNav(){
 const nav=document.createElement('nav');nav.className='site-nav-links';nav.setAttribute('aria-label','Primary navigation');
-links.forEach(([heading,items])=>{const group=document.createElement('div');group.className='site-nav-group';const label=document.createElement('span');label.className='site-nav-section';label.textContent=heading;group.append(label);items.forEach(([name,url])=>{const a=document.createElement('a');a.href=url;a.textContent=name;if(current===url||(current==='/index.html'&&url==='/'))a.setAttribute('aria-current','page');group.append(a)});nav.append(group)});
-const admin=document.createElement('a');admin.href='/administration.html';admin.textContent='Administrator sign-in';admin.setAttribute('data-admin-nav','');if(current==='/administration.html')admin.setAttribute('aria-current','page');nav.querySelectorAll('.site-nav-group')[2].append(admin);
+links.forEach(([heading,items])=>{const group=document.createElement('div');group.className='site-nav-group';if(heading==='TEACHER WORKSPACE'||heading==='RESOURCES'){group.dataset.staffOnly='';group.hidden=true;}const label=document.createElement('span');label.className='site-nav-section';label.textContent=heading;group.append(label);items.forEach(([name,url])=>{const a=document.createElement('a');a.href=url;a.textContent=name;if(current===url||(current==='/index.html'&&url==='/'))a.setAttribute('aria-current','page');group.append(a)});nav.append(group)});
+const access=document.createElement('div');access.className='site-nav-group';access.dataset.staffAccess='';const teacher=document.createElement('a');teacher.href='/staff-reflection.html';teacher.textContent='Teacher sign-in';teacher.dataset.teacherSignIn='';if(current==='/staff-reflection.html')teacher.setAttribute('aria-current','page');access.append(teacher);const admin=document.createElement('a');admin.href='/administration.html';admin.textContent='Administrator sign-in';admin.setAttribute('data-admin-nav','');if(current==='/administration.html')admin.setAttribute('aria-current','page');access.append(admin);nav.append(access);
 return nav;
 }
 function boot(){
@@ -29,8 +29,8 @@ function close(){nav.classList.remove('is-open');button.setAttribute('aria-expan
 button.addEventListener('click',()=>{const open=nav.classList.toggle('is-open');button.setAttribute('aria-expanded',String(open));button.textContent=open?'✕ Close':'☰ Menu'});
 nav.addEventListener('click',e=>{if(e.target.closest('a'))close()});header.addEventListener('keydown',e=>{if(e.key==='Escape'){close();button.focus()}});document.addEventListener('click',e=>{if(!header.contains(e.target))close()});
 window.matchMedia('(min-width:901px)').addEventListener('change',e=>{if(e.matches)close()});
-const token=sessionStorage.getItem('bernadette.staff.session');
-fetch('/api/staff-journal',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'whoami',...(token?{sessionToken:token}:{})}),cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{if(d?.user?.role==='admin')nav.querySelector('[data-admin-nav]').textContent='Administration'}).catch(()=>{});
+async function updateAccess(){const token=sessionStorage.getItem('bernadette.staff.session');let user=null;try{const r=await fetch('/api/staff-journal',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'whoami',...(token?{sessionToken:token}:{})}),cache:'no-store'});if(r.ok)user=(await r.json()).user}catch(e){}const signedIn=!!user;nav.querySelectorAll('[data-staff-only]').forEach(group=>{group.hidden=!signedIn});const teacher=nav.querySelector('[data-teacher-sign-in]');teacher.hidden=signedIn;const admin=nav.querySelector('[data-admin-nav]');admin.textContent=user?.role==='admin'?'Administration':'Administrator sign-in';admin.hidden=signedIn&&user.role!=='admin';}
+updateAccess();window.addEventListener('bernadette:staff-session-changed',updateAccess);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();

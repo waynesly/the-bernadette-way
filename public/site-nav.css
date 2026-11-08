@@ -1,4 +1,6 @@
 /* Shared navigation for The Bernadette Way */
+.site-nav .site-nav-group[hidden]{display:none!important}
+.site-nav [data-staff-access] [hidden]{display:none!important}
 /* Consolidated navigation groups; one shared menu across all pages. */
 .site-nav .site-nav-group{display:flex;flex-direction:column;gap:3px;min-width:0}
 .site-nav .site-nav-links{overflow-y:auto;overscroll-behavior:contain;min-height:0}
