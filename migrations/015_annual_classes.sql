@@ -1,0 +1,10 @@
+ALTER TABLE year5_rosters ADD COLUMN IF NOT EXISTS calendar_year INTEGER NOT NULL DEFAULT 2026;
+ALTER TABLE classroom_baseline_students ADD COLUMN IF NOT EXISTS school_student_id TEXT;
+ALTER TABLE year5_roster_students ADD COLUMN IF NOT EXISTS school_student_id TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS annual_baseline_classes_unique ON classroom_baseline_classes(calendar_year, class_name) WHERE class_name IN ('Year 3 Blue','Year 3 Red','Year 4 Blue','Year 4 Red','Year 5 Blue','Year 5 Red','Year 6 Blue','Year 6 Red');
+CREATE UNIQUE INDEX IF NOT EXISTS annual_year5_classes_unique ON year5_rosters(calendar_year, class_name) WHERE class_name IN ('Year 5 Blue','Year 5 Red');
+CREATE UNIQUE INDEX IF NOT EXISTS baseline_student_school_id_unique ON classroom_baseline_students(class_id, school_student_id) WHERE school_student_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS year5_student_school_id_unique ON year5_roster_students(roster_id, school_student_id) WHERE school_student_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS year5_rosters_by_year ON year5_rosters(calendar_year,class_name);
+ALTER TABLE year5_rosters ALTER COLUMN calendar_year SET DEFAULT (EXTRACT(YEAR FROM CURRENT_DATE)::integer);
+ALTER TABLE classroom_baseline_classes ALTER COLUMN calendar_year SET DEFAULT (EXTRACT(YEAR FROM CURRENT_DATE)::integer);
