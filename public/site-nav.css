@@ -26,6 +26,14 @@
  .site-nav .school-brand{max-width:100%}
  .site-nav .school-brand img{max-width:100%}
 }
+/* Discover · Grow · Shine: student-facing pathway stages */
+.journey-stage-guide{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0 22px;max-width:960px}
+.journey-stage-guide>div{display:flex;flex-direction:column;gap:5px;padding:13px 15px;background:#f3f8fa;border:1px solid #d6e5e9;border-top:4px solid #d4a43c;border-radius:9px;color:#17375e;line-height:1.45}
+.journey-stage-guide strong{font-size:13px;letter-spacing:.035em;color:#123d5e}
+.journey-stage-guide span{font-size:13px}
+.journey-stage-results{max-width:none}
+.journey-stage-inline{padding:9px 13px;border-left:4px solid #d4a43c;background:#f3f8fa;color:#17375e;font-size:14px;line-height:1.5}
+@media(max-width:700px){.journey-stage-guide{grid-template-columns:1fr;gap:8px}.journey-stage-guide>div{padding:10px 13px}}
 /* Catholic identity context in both student pathways */
 .faith-pathway-note{max-width:690px;margin:14px 0 22px;padding:14px 18px;border-left:4px solid #d7a638;border-radius:0 10px 10px 0;background:#fff9e9;color:#24465b;font-size:15px;line-height:1.55}
 .faith-pathway-note a{color:#075e73;font-weight:700;text-decoration:underline;text-underline-offset:3px}
