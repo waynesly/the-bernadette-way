@@ -158,11 +158,12 @@ const challengeLibrary=[
 ];
 function renderPractice(scores){
  const ranked=sortedScores(scores),topNames=ranked.slice(0,5).map(item=>item[0]);
+ const select=$('reflectionStrength');
+ if(select)select.innerHTML='<option value="">Choose a strength…</option>'+ranked.map(([name])=>'<option value="'+esc(name)+'">'+esc(name)+'</option>').join('');
  const recommended=challengeLibrary.filter(challenge=>challenge.strengths.some(strength=>topNames.includes(strength))).slice(0,3);
  const cards=(recommended.length?recommended:challengeLibrary.slice(0,3));
  $('leadershipChallenges').innerHTML=cards.map((challenge,index)=>'<article class="challenge-card"><img class="challenge-art" src="/assets/challenges/'+challenge.artwork+'.png" alt="" loading="lazy"><span class="challenge-number">CHALLENGE '+String(index+1).padStart(2,'0')+'</span><h3>'+esc(challenge.title)+'</h3><div class="challenge-tags">'+challenge.strengths.map(strength=>'<span>'+esc(strength)+'</span>').join('')+'</div><p>'+esc(challenge.action)+'</p><p class="challenge-prompt"><b>Reflect:</b> '+esc(challenge.prompt)+'</p></article>').join('');
- const select=$('reflectionStrength');
- select.innerHTML='<option value="">Choose a strength…</option>'+ranked.map(([name])=>'<option value="'+esc(name)+'">'+esc(name)+'</option>').join('');
+ if(select)select.innerHTML='<option value="">Choose a strength…</option>'+ranked.map(([name])=>'<option value="'+esc(name)+'">'+esc(name)+'</option>').join('');
  loadReflections();
 }
 async function loadReflections(){
