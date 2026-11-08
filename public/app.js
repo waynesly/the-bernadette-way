@@ -248,7 +248,7 @@ async function downloadPdf(markup,studentOnly=false,fileName='strengths-profile.
    console.info('[PDF diagnostic] Starting capture',diagnostics);
    let canvas;
    try{
-    canvas=await timeout(window.html2canvas(page,{scale:isSafariPrint()?0.75:1,backgroundColor:'#ffffff',useCORS:true,logging:false,windowWidth:980,imageTimeout:5000,removeContainer:true}),25000,'PDF page '+(index+1));
+    canvas=await timeout(window.html2canvas(page,{scale:isSafariPrint()?0.75:1,backgroundColor:'#ffffff',useCORS:true,logging:false,windowWidth:980,imageTimeout:5000,removeContainer:true,foreignObjectRendering:isSafariPrint()}),25000,'PDF page '+(index+1));
    }catch(captureError){
     console.error('[PDF diagnostic] Capture failed after '+Math.round(performance.now()-started)+'ms',diagnostics,captureError);
     if(isSafariPrint()&&index===0){
