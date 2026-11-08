@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS staff_journal_accounts (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), username TEXT NOT NULL UNIQUE, display_name TEXT NOT NULL, salt TEXT NOT NULL, password_hash TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS staff_journal_sessions (token_hash TEXT PRIMARY KEY, account_id UUID NOT NULL REFERENCES staff_journal_accounts(id), expires_at TIMESTAMPTZ NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS staff_journal_entries (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), owner_id UUID NOT NULL REFERENCES staff_journal_accounts(id), title TEXT NOT NULL DEFAULT 'Staff reflection', status TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('draft','complete')), fields JSONB NOT NULL DEFAULT '{}'::jsonb, created_at TIMESTAMPTZ NOT NULL DEFAULT now(), updated_at TIMESTAMPTZ NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS idx_staff_journal_owner ON staff_journal_entries(owner_id,updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_staff_journal_session_expiry ON staff_journal_sessions(expires_at);
+CREATE TABLE IF NOT EXISTS staff_journal_login_attempts (id BIGSERIAL PRIMARY KEY, client_ip TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS idx_staff_journal_attempts ON staff_journal_login_attempts(client_ip,created_at);
