@@ -15,6 +15,8 @@ const access=document.createElement('div');access.className='site-nav-group';acc
 return nav;
 }
 function boot(){
+/* Load the same final navigation rules on every page, after page-specific CSS. */
+if(!document.querySelector('link[data-unified-navigation]')){const sheet=document.createElement('link');sheet.rel='stylesheet';sheet.href='/unified-navigation.css?v=92';sheet.dataset.unifiedNavigation='';document.head.append(sheet)}
 let header=document.querySelector('header.site-nav');
 if(!header){const existing=document.body.querySelector(':scope > header');if(existing){header=existing;header.classList.add('site-nav','unified-site-nav')}else{header=document.createElement('header');header.className='site-nav unified-site-nav';document.body.insertBefore(header,document.body.firstChild)}}
 else header.classList.add('unified-site-nav');
