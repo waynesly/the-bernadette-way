@@ -1,0 +1,23 @@
+/* Shared navigation for Science of Strengths */
+.site-nav{background:var(--sbcps-navy);color:#fff}
+.site-nav .school-brand{display:block;text-decoration:none}
+.site-nav .school-brand img{display:block;width:190px;height:auto}
+.site-nav-links{display:grid;gap:5px;width:100%}
+.site-nav-section{display:block;margin:18px 0 4px;padding:0 11px;color:#9dc1cf;font:500 10px/1.2 var(--font-label);letter-spacing:.14em;text-transform:uppercase}
+.site-nav-links a,.site-nav-links button{box-sizing:border-box;width:100%;margin:0;padding:11px 12px;border:1px solid transparent;border-radius:9px;background:transparent;color:#eaf5f7;text-align:left;text-decoration:none;font:700 14px/1.25 var(--font-body);cursor:pointer}
+.site-nav-links a:hover,.site-nav-links button:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.16)}
+.site-nav-links a[aria-current="page"],.site-nav-links button.active{background:#fff;color:var(--sbcps-navy);border-color:#fff}
+.site-nav-links .site-nav-action{margin-top:8px;border-color:rgba(255,255,255,.28);color:#fff}
+@media(min-width:901px){
+ body.site-side-nav{padding-left:260px}
+ .site-nav{position:fixed!important;inset:0 auto 0 0!important;z-index:100;width:260px;box-sizing:border-box;padding:34px 28px!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:30px;border-right:4px solid var(--sbcps-gold);box-shadow:none!important}
+ .site-nav .site-nav-links{margin-top:auto}
+}
+@media(max-width:900px){
+ .site-nav{position:relative!important;inset:auto!important;width:auto!important;padding:13px 18px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:16px;border-bottom:3px solid var(--sbcps-gold);border-right:0}
+ .site-nav .school-brand img{width:min(185px,45vw)}
+ .site-nav-links{display:flex;align-items:center;justify-content:flex-end;gap:5px;width:auto}
+ .site-nav-section,.site-nav-links a:not([aria-current="page"]){display:none}
+ .site-nav-links a,.site-nav-links button{width:auto;padding:9px 10px;white-space:nowrap;font-size:13px}
+ .site-nav-links .site-nav-action{margin-top:0}
+}
