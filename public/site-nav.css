@@ -1,4 +1,13 @@
 /* Shared navigation for The Bernadette Way */
+/* Consolidated navigation groups; one shared menu across all pages. */
+.site-nav .site-nav-group{display:flex;flex-direction:column;gap:3px;min-width:0}
+.site-nav .site-nav-links{overflow-y:auto;overscroll-behavior:contain;min-height:0}
+.site-nav .site-nav-links [hidden]{display:none!important}
+.site-nav .site-nav-links .site-nav-section{margin:13px 0 5px}
+.site-nav .site-nav-links a{display:block}
+@media(min-width:901px){.site-nav.unified-site-nav{gap:14px!important;padding:22px 18px!important}.site-nav.unified-site-nav .site-nav-links{margin-top:0!important;gap:9px}.site-nav.unified-site-nav .site-nav-links a{padding:8px 10px;font-size:13px}.site-nav.unified-site-nav .school-brand img{width:185px}}
+@media(max-width:900px){.site-nav .site-nav-group{width:100%}.site-nav .site-nav-links.is-open{max-height:min(75vh,720px);overflow-y:auto}.site-nav .site-nav-links a{width:100%}}
+@media print{.site-nav.unified-site-nav{display:none!important}body.site-side-nav{padding-left:0!important}}
 .site-nav{background:var(--sbcps-navy);color:#fff}
 .site-nav .school-brand{display:block;text-decoration:none}
 .site-nav .school-brand img{display:block;width:190px;height:auto}
