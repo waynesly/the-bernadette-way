@@ -32,7 +32,7 @@
  .setup-intro{text-align:left}
 }
 
-/* Shared desktop content gutter: aligned with the Year 5 Strengths Journey. */
+/* Shared desktop content gutter: aligned with the Lead with Heart. */
 @media(min-width:901px){
  /* Keep the hero inside the post-sidebar content canvas, as on the Year 5 page. */
  .landing-page .landing-hero{width:100%!important;margin-inline:0!important;padding-inline:max(48px,calc((100vw - 1440px)/2))!important}
