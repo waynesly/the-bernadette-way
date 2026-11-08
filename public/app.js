@@ -231,32 +231,46 @@ function teacherDetailReportMarkup(r){const sorted=sortedScores(r.scores).slice(
 function reportMarkup(r,full=true){const sorted=sortedScores(r.scores),hero=assetSlug(sorted[0]?.[0]||'leadership'),responses=dataList(r.responses),topFive=sorted.slice(0,5),profile=leadershipProfile(r.scores),summary='<section class="printreport pdf-page teacher-summary">'+profileHeader('YEAR 5 · TEACHER REPORT')+'<div class="report-wave"></div><div class="teacher-report-hero"><div><p class="report-kicker">LEAD WITH HEART</p><h2>'+esc(r.student_name)+' — strengths profile</h2><p>Class: '+esc(r.class_name)+(r.created_at?' · '+new Date(r.created_at).toLocaleDateString('en-AU'):'')+'</p><p class="student-report-note">Use as a private teaching conversation starter, never as a fixed judgement.</p></div><img src="/assets/strengths/'+esc(hero)+'-v1.png" alt=""></div><h3>Signature strengths</h3><div class="teacher-top-five">'+topFive.map(([name,value],i)=>'<article><img src="/assets/strengths/'+esc(assetSlug(name))+'-v1.png" alt=""><span>0'+(i+1)+'</span><b>'+esc(name)+'</b><strong>'+value+' / 20</strong><p>'+esc(info(name)[2])+'</p></article>').join('')+'</div>'+leadershipTeacherMarkup(profile)+'<section class="teacher-conversation"><p class="report-kicker">TEACHING CONVERSATION</p><h3>Strengths in action</h3>'+topFive.map(([name])=>'<p><b>'+esc(name)+'</b><span>'+esc(info(name)[2])+'</span></p>').join('')+'</section><p class="report-footer">Private teaching conversation · Use for reflection and discussion, never as a label.</p></section>',chart='<section class="printreport pdf-page teacher-chart-page">'+profileHeader('YEAR 5 · WHOLE PROFILE')+'<div class="report-wave"></div><p class="report-kicker">THE WHOLE PICTURE</p><h2>'+esc(r.student_name)+'’s 24 character strengths</h2><p class="chart-intro">Scores reflect this student’s self-ratings today. Each strength is shown out of 20.</p><div class="teacher-score-chart">'+sorted.map(([name,value],i)=>'<div><span>'+esc(info(name)[0])+'</span><b>'+esc(name)+'</b><i><em style="width:'+Math.round(value/20*100)+'%;background:'+palette[i%palette.length][1]+'"></em></i><strong>'+value+' / 20</strong></div>').join('')+'</div><p class="report-footer">Private teaching conversation · For reflection and discussion only.</p></section>',appendix=full?[0,32,64].map((start,page)=>'<section class="printreport pdf-page response-page">'+profileHeader('YEAR 5 · RESPONSE APPENDIX')+'<div class="report-wave"></div><p class="report-kicker">PRIVATE TEACHER RECORD · PAGE '+(page+1)+' OF 3</p><h2>'+esc(r.student_name)+' — recorded responses</h2><p class="chart-intro">Questionnaire self-ratings, scale 1–5.</p><table class="printtable"><thead><tr><th>No.</th><th>Statement</th><th>Rating</th></tr></thead><tbody>'+Q.slice(start,start+32).map((q,i)=>'<tr><td>'+(start+i+1)+'</td><td>'+esc(q)+'</td><td>'+esc(ratingLabels[Number(responses[start+i])-1]||'Not answered')+'</td></tr>').join('')+'</tbody></table></section>').join(''):'';return summary+teacherDetailReportMarkup(r)+growthReportMarkup(r,'teacher')+chart+appendix+reflectionReportPages(r)}
 async function downloadPdf(markup,studentOnly=false,fileName='strengths-profile.pdf'){
  const area=$('printArea'),status=$('pdfDownloadStatus');
- if(status){status.hidden=false;status.textContent='Preparing your PDF…';}
- if(!area||!window.html2canvas||!window.jspdf?.jsPDF){if(status)status.textContent='PDF tools are unavailable. Refresh this page and try again.';else alert('PDF tools are unavailable. Refresh this page.');return}
+ const notify=message=>{if(status){status.hidden=false;status.textContent=message;}};
+ notify('Preparing your PDF…');
+ if(!area||!window.html2canvas||!window.jspdf?.jsPDF){notify('PDF tools could not load. Refresh this page and try again.');return}
  area.className='pdf-render '+(studentOnly?'student-print':'');area.innerHTML=markup;
+ const timeout=(promise,ms,label)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+' timed out')),ms))]);
  try{
   const images=[...area.querySelectorAll('img')];
-  await Promise.race([Promise.all(images.map(img=>img.decode?.().catch(()=>undefined)||Promise.resolve())),new Promise(resolve=>setTimeout(resolve,2200))]);
+  await Promise.race([Promise.all(images.map(img=>img.decode?.().catch(()=>undefined)||Promise.resolve())),new Promise(resolve=>setTimeout(resolve,1800))]);
   const {jsPDF}=window.jspdf,doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true}),pages=[...area.querySelectorAll('.pdf-page')];
   if(!pages.length)throw Error('No PDF pages were rendered');
   for(let index=0;index<pages.length;index++){
-   const canvas=await window.html2canvas(pages[index],{scale:1.5,backgroundColor:'#ffffff',useCORS:true,logging:false,windowWidth:980});
+   notify('Rendering PDF page '+(index+1)+' of '+pages.length+'…');
+   const canvas=await timeout(window.html2canvas(pages[index],{scale:1,backgroundColor:'#ffffff',useCORS:true,logging:false,windowWidth:980,imageTimeout:3000}),12000,'PDF page '+(index+1));
    if(!canvas.width||!canvas.height)throw Error('PDF page could not be captured');
    if(index)doc.addPage();
-   doc.addImage(canvas.toDataURL('image/jpeg',0.88),'JPEG',10,10,190,277,undefined,'FAST');
+   doc.addImage(canvas.toDataURL('image/jpeg',0.8),'JPEG',10,10,190,277,undefined,'FAST');
   }
-  const blob=doc.output('blob'),url=URL.createObjectURL(blob);
+  notify('Finalising your PDF…');
+  const blob=await timeout(Promise.resolve().then(()=>doc.output('blob')),8000,'PDF creation'),url=URL.createObjectURL(blob);
   const anchor=document.createElement('a');anchor.href=url;anchor.download=fileName;anchor.textContent='Open or save '+fileName;anchor.className='secondary';anchor.style.display='inline-block';anchor.style.marginLeft='10px';
   if(status){status.replaceChildren(document.createTextNode('Your PDF is ready. '),anchor);status.hidden=false;}else document.body.appendChild(anchor);
   anchor.click();
-  // Keep the link available for browsers that block automatic downloads after async rendering.
-  // Revoke previous export URL only when a new export replaces it.
   if(window.__lastYear5PdfUrl)URL.revokeObjectURL(window.__lastYear5PdfUrl);
   window.__lastYear5PdfUrl=url;
- }catch(error){console.error('PDF export failed',error);if(status){status.hidden=false;status.textContent='PDF generation failed: '+(error?.message||'Please try again.')}else alert('We could not generate that PDF. Please try again.')}
- finally{area.innerHTML='';area.className=''}
+ }catch(error){
+  console.error('PDF export failed',error);
+  notify('PDF generation stopped: '+(error?.message||'Unknown error')+'. Please retry, or use the print option in your browser.');
+ }finally{area.innerHTML='';area.className=''}
 }
-async function reflectionsForExport(){if(!resumeToken)return [];try{const response=await fetch('/api/reflections',{headers:{'X-Strengths-Resume':resumeToken},cache:'no-store'});if(!response.ok)throw Error('Reflection request returned '+response.status);const data=await response.json();return Array.isArray(data.reflections)?data.reflections:[]}catch(error){console.warn('Reflections unavailable for PDF export; continuing with strengths report',error);return []}}
+async function reflectionsForExport(){
+ if(!resumeToken)return [];
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),4500);
+ try{
+  const response=await fetch('/api/reflections',{headers:{'X-Strengths-Resume':resumeToken},cache:'no-store',signal:controller.signal});
+  if(!response.ok)throw Error('Reflection request returned '+response.status);
+  const data=await response.json();
+  return Array.isArray(data.reflections)?data.reflections:[];
+ }catch(error){console.warn('Reflections unavailable for PDF export; continuing with strengths report',error);return []}
+ finally{clearTimeout(timer)}
+}
 async function printStudentResult(){if(!submitted||!studentScores){alert('Complete or reopen your strengths profile before downloading.');return}const reflections=await reflectionsForExport();await downloadPdf(studentReportMarkup({student_name:student,class_name:clazz,scores:studentScores,selected_reflections:reflections}),true,(student||'student')+'-strengths-profile.pdf')}
 async function printFamilyResult(){if(!submitted||!studentScores){alert('Complete or reopen your strengths profile before downloading.');return}const reflections=await reflectionsForExport();await downloadPdf(familyReportMarkup({student_name:student,class_name:clazz,scores:studentScores,selected_reflections:reflections}),true,(student||'student')+'-family-guide.pdf')}
 function printReports(id){const arr=id?results.filter(r=>String(r.id)===String(id)):viewRows;if(!arr.length){alert('No reports to export.');return}const label=arr.length===1?(arr[0].student_name||'student'):'year5-cohort';downloadPdf(arr.map(r=>reportMarkup(r,true)).join(''),false,label+'-teacher-report.pdf')}
