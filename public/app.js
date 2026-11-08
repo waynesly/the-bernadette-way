@@ -230,39 +230,95 @@ function familyReportMarkup(r){const sorted=sortedScores(r.scores),lead=sorted[0
 function teacherDetailReportMarkup(r){const sorted=sortedScores(r.scores).slice(0,5),profile=leadershipProfile(r.scores),rows=sorted.map(([name,value],index)=>{const detail=window.LEADERSHIP_PROFILES?.strengthDetails?.[name]||{};return '<article class="teacher-strength-detail"><div class="teacher-strength-detail-head"><span>'+String(index+1).padStart(2,'0')+'</span><img src="/assets/strengths/'+esc(assetSlug(name))+'-v1.png" alt=""><div><p>STRENGTH '+String(index+1).padStart(2,'0')+' · '+value+' / 20</p><h3>'+esc(name)+'</h3></div></div><p><b>What it means</b><span>'+esc(detail.meaning||info(name)[1])+'</span></p><p><b>In class</b><span>'+esc(detail.school||'Look for opportunities to use this strength in learning and relationships.')+'</span></p><p><b>Leadership opportunity</b><span>'+esc(info(name)[2])+'</span></p></article>'}).join('');return '<section class="printreport pdf-page teacher-detail-page">'+profileHeader('YEAR 5 · TEACHER DETAILS')+'<div class="report-wave"></div><p class="report-kicker">STRENGTHS IN PRACTICE</p><h2>'+esc(r.student_name)+' — classroom applications</h2><p class="chart-intro">Use these self-reported strengths as private conversation starters. Pair them with your own classroom observations.</p><section class="teacher-focus-callout"><b>Leadership focus: '+esc(profile?.title||'Strengths in action')+'</b><span>'+esc(profile?.teacherPrompt||'Where have you noticed this student using a strength to support others?')+'</span></section><div class="teacher-strength-details">'+rows+'</div><p class="report-footer">Private teaching conversation · For reflection and planning, never as a fixed label.</p></section>'}
 function reportMarkup(r,full=true){const sorted=sortedScores(r.scores),hero=assetSlug(sorted[0]?.[0]||'leadership'),responses=dataList(r.responses),topFive=sorted.slice(0,5),profile=leadershipProfile(r.scores),summary='<section class="printreport pdf-page teacher-summary">'+profileHeader('YEAR 5 · TEACHER REPORT')+'<div class="report-wave"></div><div class="teacher-report-hero"><div><p class="report-kicker">LEAD WITH HEART</p><h2>'+esc(r.student_name)+' — strengths profile</h2><p>Class: '+esc(r.class_name)+(r.created_at?' · '+new Date(r.created_at).toLocaleDateString('en-AU'):'')+'</p><p class="student-report-note">Use as a private teaching conversation starter, never as a fixed judgement.</p></div><img src="/assets/strengths/'+esc(hero)+'-v1.png" alt=""></div><h3>Signature strengths</h3><div class="teacher-top-five">'+topFive.map(([name,value],i)=>'<article><img src="/assets/strengths/'+esc(assetSlug(name))+'-v1.png" alt=""><span>0'+(i+1)+'</span><b>'+esc(name)+'</b><strong>'+value+' / 20</strong><p>'+esc(info(name)[2])+'</p></article>').join('')+'</div>'+leadershipTeacherMarkup(profile)+'<section class="teacher-conversation"><p class="report-kicker">TEACHING CONVERSATION</p><h3>Strengths in action</h3>'+topFive.map(([name])=>'<p><b>'+esc(name)+'</b><span>'+esc(info(name)[2])+'</span></p>').join('')+'</section><p class="report-footer">Private teaching conversation · Use for reflection and discussion, never as a label.</p></section>',chart='<section class="printreport pdf-page teacher-chart-page">'+profileHeader('YEAR 5 · WHOLE PROFILE')+'<div class="report-wave"></div><p class="report-kicker">THE WHOLE PICTURE</p><h2>'+esc(r.student_name)+'’s 24 character strengths</h2><p class="chart-intro">Scores reflect this student’s self-ratings today. Each strength is shown out of 20.</p><div class="teacher-score-chart">'+sorted.map(([name,value],i)=>'<div><span>'+esc(info(name)[0])+'</span><b>'+esc(name)+'</b><i><em style="width:'+Math.round(value/20*100)+'%;background:'+palette[i%palette.length][1]+'"></em></i><strong>'+value+' / 20</strong></div>').join('')+'</div><p class="report-footer">Private teaching conversation · For reflection and discussion only.</p></section>',appendix=full?[0,32,64].map((start,page)=>'<section class="printreport pdf-page response-page">'+profileHeader('YEAR 5 · RESPONSE APPENDIX')+'<div class="report-wave"></div><p class="report-kicker">PRIVATE TEACHER RECORD · PAGE '+(page+1)+' OF 3</p><h2>'+esc(r.student_name)+' — recorded responses</h2><p class="chart-intro">Questionnaire self-ratings, scale 1–5.</p><table class="printtable"><thead><tr><th>No.</th><th>Statement</th><th>Rating</th></tr></thead><tbody>'+Q.slice(start,start+32).map((q,i)=>'<tr><td>'+(start+i+1)+'</td><td>'+esc(q)+'</td><td>'+esc(ratingLabels[Number(responses[start+i])-1]||'Not answered')+'</td></tr>').join('')+'</tbody></table></section>').join(''):'';return summary+teacherDetailReportMarkup(r)+growthReportMarkup(r,'teacher')+chart+appendix+reflectionReportPages(r)}
 function safariTextPdf(doc,pages,notify){
- // Safari's HTML canvas capture can return a blank bitmap; draw report content directly into jsPDF instead.
- const margin=17,maxWidth=176,bottom=278;
- const blockTags=new Set(['P','H1','H2','H3','H4','H5','H6','DIV','SECTION','ARTICLE','LI','TR','HEADER','FOOTER','BLOCKQUOTE']);
- let pageNo=0;
- for(const page of pages){
-  if(pageNo++)doc.addPage();
-  let y=19;
-  const line=(value,size=9,bold=false,indent=0)=>{
-   const content=String(value||'').replace(/\s+/g,' ').trim();if(!content)return;
-   doc.setFont('helvetica',bold?'bold':'normal');doc.setFontSize(size);doc.setTextColor(24,48,75);
-   const wrapped=doc.splitTextToSize(content,maxWidth-indent);
-   for(const part of wrapped){if(y>bottom){doc.addPage();y=19}doc.text(part,margin+indent,y);y+=Math.max(4.3,size*.46)}
-   y+=2;
+ // Vector PDF layout: no HTML canvas, foreignObject or browser print dialog.
+ const navy=[14,55,94],teal=[8,127,140],gold=[244,188,69],ink=[35,57,77],muted=[90,108,122];
+ const left=17,right=193,width=right-left,foot=277;
+ let y=29,number=0;
+ const rgb=(c)=>doc.setTextColor(...c);
+ const clean=s=>String(s||'').replace(/[\u{1F000}-\u{1FFFF}]/gu,'').replace(/[\u2600-\u27BF]/g,'').replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/[\u2013\u2014]/g,'-').replace(/\u2026/g,'...').replace(/\u00b7/g,'|').replace(/[^\x20-\x7E\u00C0-\u00FF]/g,'').replace(/\s+/g,' ').trim();
+ const header=()=>{
+  doc.setFillColor(...navy);doc.rect(0,0,210,17,'F');
+  doc.setFillColor(...gold);doc.rect(0,17,210,1.5,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(255,255,255);
+  doc.text('THE BERNADETTE WAY',left,10.5);
+  doc.setFontSize(8);doc.text('LEAD WITH HEART',right,10.5,{align:'right'});
+  y=29;
+ };
+ const next=()=>{if(number++)doc.addPage();header()};
+ const ensure=h=>{if(y+h>foot){doc.addPage();number++;header()}};
+ const write=(text,size=9,bold=false,color=ink,indent=0,after=2)=>{
+  const s=clean(text);if(!s)return;
+  doc.setFont('helvetica',bold?'bold':'normal');doc.setFontSize(size);
+  const lines=doc.splitTextToSize(s,width-indent-2);
+  const step=size*.44+1.15;ensure(lines.length*step+after);
+  rgb(color);for(const ln of lines){doc.text(ln,left+indent,y);y+=step}y+=after;
+ };
+ const heading=(text,major=false)=>{
+  const s=clean(text);if(!s)return;
+  doc.setFont('helvetica','bold');doc.setFontSize(major?16:11);
+  const lines=doc.splitTextToSize(s,width-7);
+  ensure(lines.length*(major?8:6)+8);
+  y+=major?3:2;doc.setFillColor(...teal);doc.roundedRect(left,y-3,2,major?11:7,0.8,0.8,'F');
+  rgb(navy);for(const ln of lines){doc.text(ln,left+7,y+2);y+=major?8:6}y+=3;
+ };
+ const label=(text)=>{ensure(9);doc.setFillColor(234,247,245);doc.roundedRect(left,y-3,width,9,2,2,'F');write(text,8,true,teal,3,2)};
+ const card=(node)=>{
+  const children=[...node.children];
+  const parts=[];
+  const gather=n=>{
+   if(n.tagName==='IMG'||n.tagName==='SVG'||n.tagName==='I'||n.tagName==='EM')return;
+   if(['P','H3','H4','B','STRONG','SPAN'].includes(n.tagName)&&!n.querySelector('p,h3,h4,b,strong,span')){const s=clean(n.textContent);if(s)parts.push({text:s,strong:['H3','H4','B','STRONG'].includes(n.tagName)});return}
+   if(n.children.length===0){const s=clean(n.textContent);if(s)parts.push({text:s,strong:false});return}
+   for(const c of n.children)gather(c);
   };
-  doc.setFillColor(14,55,94);doc.rect(0,0,210,10,'F');
-  line('THE BERNADETTE WAY  |  LEAD WITH HEART',11,true);
-  const walk=(node,depth=0)=>{
-   if(node.nodeType===3){const value=node.textContent.trim();if(value&&node.parentElement?.children.length===0)line(value,9,false,Math.min(depth,2)*2);return}
-   if(node.nodeType!==1)return;
-   const tag=node.tagName;
-   if(['SCRIPT','STYLE','SVG','IMG','BUTTON'].includes(tag))return;
-   if(tag==='H1'||tag==='H2'){line(node.textContent,14,true);return}
-   if(tag==='H3'||tag==='H4'){line(node.textContent,11,true);return}
-   if(tag==='P'||tag==='LI'||tag==='TD'||tag==='TH'){line(node.textContent,9,tag==='TH',tag==='LI'?4:0);return}
-   if(tag==='TR'){const cells=[...node.children].filter(c=>['TD','TH'].includes(c.tagName));if(cells.length){line(cells.map(c=>c.textContent.trim()).join('  |  '),8);return}}
-   if(tag==='B'||tag==='STRONG'){line(node.textContent,9,true);return}
-   if(tag==='SPAN'&&node.children.length===0){if(node.parentElement?.tagName==='I')return;line(node.textContent,8);return}
-   if(tag==='I'||tag==='EM')return;
-   for(const child of node.childNodes)walk(child,depth+(blockTags.has(tag)?1:0));
-  };
-  for(const child of page.childNodes)walk(child);
-  doc.setFontSize(8);doc.setTextColor(95,111,124);doc.text('Private student reflection  |  Discover · Grow · Shine',margin,290);
-  notify('Building Safari-compatible PDF page '+pageNo+' of '+pages.length+'…');
+  children.forEach(gather);
+  if(!parts.length)return;
+  const sizes=parts.map(x=>x.strong?10:8.5);
+  const heights=parts.map((x,i)=>doc.splitTextToSize(x.text,width-14).length*(sizes[i]*.44+1.15)+1);
+  const total=heights.reduce((a,b)=>a+b,0)+9;
+  ensure(Math.min(total,foot-29));
+  const start=y;
+  doc.setFillColor(247,250,250);doc.setDrawColor(218,231,231);
+  doc.roundedRect(left,start,width,Math.min(total,foot-start),2,2,'FD');
+  y+=6;
+  for(let i=0;i<parts.length;i++)write(parts[i].text,sizes[i],parts[i].strong,parts[i].strong?navy:ink,5,1);
+  y+=3;
+ };
+ const walk=(node)=>{
+  if(node.nodeType!==1)return;
+  const tag=node.tagName,cls=node.classList;
+  if(['IMG','SVG','SCRIPT','STYLE','BUTTON'].includes(tag))return;
+  if(tag==='H1'||tag==='H2'){heading(node.textContent,true);return}
+  if(tag==='H3'||tag==='H4'){heading(node.textContent);return}
+  if(cls.contains('report-kicker')){label(node.textContent);return}
+  if(cls.contains('report-wave')||cls.contains('report-footer')){if(cls.contains('report-footer'))write(node.textContent,7,false,muted);return}
+  if(cls.contains('profile-score-chart')||cls.contains('teacher-score-chart')){
+   for(const row of node.children){
+    const name=clean(row.querySelector('b')?.textContent||'Strength'),score=clean(row.querySelector('strong')?.textContent||'');
+    const value=Number(score.match(/\d+/)?.[0]||0);
+    ensure(9);doc.setFont('helvetica','normal');doc.setFontSize(8);rgb(ink);doc.text(name,left,y);
+    doc.setFillColor(230,239,238);doc.roundedRect(95,y-3,68,3,1,1,'F');
+    doc.setFillColor(...teal);doc.roundedRect(95,y-3,68*Math.max(0,Math.min(20,value))/20,3,1,1,'F');
+    doc.setFont('helvetica','bold');doc.text(score,190,y,{align:'right'});y+=8;
+   }y+=3;return;
+  }
+  if(cls.contains('student-strength-detail')||cls.contains('family-strength-detail')||cls.contains('growth-strength-card')||cls.contains('growth-card')||cls.contains('teacher-strength-detail')||cls.contains('profile-top-five')&&tag==='ARTICLE'){card(node);return}
+  if(tag==='P'||tag==='LI'){write(node.textContent,9,false,ink,0,3);return}
+  if(tag==='TR'){const cells=[...node.children].filter(x=>x.tagName==='TD'||x.tagName==='TH');if(cells.length)write(cells.map(x=>x.textContent).join(' | '),8);return}
+  if(tag==='SPAN'||tag==='B'||tag==='STRONG'){if(!node.children.length)write(node.textContent,9,tag!=='SPAN');return}
+  for(const child of node.children)walk(child);
+ };
+ for(let i=0;i<pages.length;i++){
+  next();label('REPORT SECTION '+(i+1)+' OF '+pages.length);
+  for(const child of pages[i].children)walk(child);
+  notify('Formatting PDF section '+(i+1)+' of '+pages.length+'...');
+ }
+ const total=doc.internal.getNumberOfPages();
+ for(let i=1;i<=total;i++){
+  doc.setPage(i);doc.setDrawColor(222,230,234);doc.line(left,282,right,282);
+  doc.setFont('helvetica','normal');doc.setFontSize(8);rgb(muted);
+  doc.text('Discover | Grow | Shine    -    Private learning reflection',left,288);
+  doc.text(i+' / '+total,right,288,{align:'right'});
  }
 }
 async function downloadPdf(markup,studentOnly=false,fileName='strengths-profile.pdf'){
