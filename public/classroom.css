@@ -88,7 +88,7 @@ body.site-side-nav main:has(.hero-immersive){max-width:none;padding:0}
 .hero-immersive .lead{color:#405e70;text-shadow:0 1px 0 rgba(255,255,255,.45)}
 .hero-immersive .pill-row span{background:rgba(229,247,238,.9);box-shadow:0 1px 0 rgba(255,255,255,.7)}
 .hero-immersive .hero-side{display:block}
-.hero-immersive .join-card{max-width:430px;margin:0 0 0 auto;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);box-shadow:0 20px 48px rgba(17,47,69,.18)}
+.hero-immersive .join-card{max-width:430px;margin:28px 0 0;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);box-shadow:0 20px 48px rgba(17,47,69,.18)}
 @media(max-width:900px){
   body.site-side-nav main:has(.hero-immersive){padding:0}
   .hero.hero-immersive{grid-template-columns:1fr;gap:26px;min-height:auto;padding:72px 24px 42px}
