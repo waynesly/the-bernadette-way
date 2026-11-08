@@ -43,6 +43,19 @@ export default async function(req,res){
   const classroom=await getClass(classId(body.classId));
   if(!classroom)return res.status(404).json({error:"Class not found."});
   if(body.action==="get_class")return res.json(await classData(classroom));
+  if(body.action==="reset_join_codes"){
+    const all=body.scope==="class",studentId=String(body.studentId||"");
+    if(!all&&!/^[a-f0-9-]{36}$/i.test(studentId))return res.status(400).json({error:"Choose a student."});
+    const {rows}=await db.query("SELECT id,display_name FROM classroom_baseline_students WHERE class_id=$1 AND ($2::boolean OR id=$3::uuid) ORDER BY display_name",[classroom.id,all,all?null:studentId]);
+    if(!rows.length)return res.status(404).json({error:"No matching students in this class."});
+    if(body.confirm!==true)return res.status(400).json({error:"Confirm the code reset first."});
+    const codes=[];
+    for(const student of rows){let updated=false;
+      for(let attempt=0;attempt<5&&!updated;attempt++){const join_code=makeCode();try{const result=await db.query("UPDATE classroom_baseline_students SET join_code_hash=$1 WHERE id=$2 AND class_id=$3 RETURNING id",[await hash(join_code),student.id,classroom.id]);if(result.rows.length){codes.push({id:student.id,display_name:student.display_name,join_code});updated=true}}catch(error){if(attempt===4)throw error}}
+      if(!updated)return res.status(500).json({error:"A code could not be reset. Refresh and check before trying again."});
+    }
+    return res.json({ok:true,students:codes});
+  }
   if(body.action==="set_window"){
     const window=body.assessmentWindow;
     if(!WINDOWS.includes(window))return res.status(400).json({error:"Choose a valid assessment window."});
