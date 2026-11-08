@@ -1,15 +1,15 @@
 import { db } from "hatchable";
-import { verifyToken } from "lib/teacher-auth.js";
+import {staff,permitted,assignments} from "lib/class-access.js";
 import { cleanText, hash, makeCode, WINDOWS } from "lib/classroom-baseline.js";
 export const access="public";
 export const methods=["GET","POST"];
 
-async function requireTeacher(req,res){if(!await verifyToken(req)){res.status(401).json({error:"Teacher password required."});return false}return true}
+async function requireTeacher(req,res){const user=await staff(req);if(!user){res.status(401).json({error:"Staff sign-in required."});return null}return user}
 function classId(value){return String(value||"").trim()}
 async function getClass(id){const {rows}=await db.query("SELECT id,class_name,calendar_year,current_window FROM classroom_baseline_classes WHERE id=$1",[id]);return rows[0]||null}
-async function listClasses(){const {rows}=await db.query(`SELECT c.id,c.class_name,c.calendar_year,c.current_window,COUNT(s.id)::int AS student_count
+async function listClasses(user){const {rows}=await db.query(`SELECT c.id,c.class_name,c.calendar_year,c.current_window,COUNT(s.id)::int AS student_count
   FROM classroom_baseline_classes c LEFT JOIN classroom_baseline_students s ON s.class_id=c.id
-  GROUP BY c.id ORDER BY c.calendar_year DESC,c.class_name ASC`);return rows}
+  WHERE ($1::boolean OR c.id = ANY($2::uuid[])) GROUP BY c.id ORDER BY c.calendar_year DESC,c.class_name ASC`,[user.role==="admin",await assignments(user,"baseline")||[]]);return rows}
 async function classData(classroom){
   const {rows}=await db.query(`SELECT s.id,s.display_name,a.assessment_window,a.status,a.scores,a.completed_at,a.responses
     FROM classroom_baseline_students s LEFT JOIN classroom_baseline_attempts a ON a.student_id=s.id
@@ -23,10 +23,10 @@ async function classData(classroom){
 }
 export default async function(req,res){
  res.setHeader("Cache-Control","no-store");
-  if(!await requireTeacher(req,res))return;
+  const user=await requireTeacher(req,res);if(!user)return;
   res.setHeader("Cache-Control","no-store");
   const body=req.body||{};
-  if(req.method==="GET")return res.json({classes:await listClasses()});
+  if(req.method==="GET")return res.json({classes:await listClasses(user)});
   if(body.action==="list_classes")return res.json({classes:await listClasses()});
   if(body.action==="create_class"){
     const className=cleanText(body.className,80);
@@ -37,12 +37,13 @@ export default async function(req,res){
     let accessCode=makeCode(),created;
     for(let attempt=0;attempt<4;attempt++){try{created=await db.query("INSERT INTO classroom_baseline_classes(class_name,calendar_year,access_code_hash) VALUES($1,$2,$3) RETURNING id,class_name,calendar_year,current_window",[className,calendarYear,await hash(accessCode)]);break}catch(error){accessCode=makeCode()}}
     if(!created?.rows?.[0])return res.status(500).json({error:"Unable to create this class. Please try again."});
-    const classroom=created.rows[0],roster=[];
+    const classroom=created.rows[0],roster=[];await db.query("INSERT INTO staff_class_assignments(account_id,class_kind,class_id) VALUES($1,'baseline',$2)",[user.id,classroom.id]);
     for(const displayName of names){let joinCode=makeCode(),saved=false;for(let attempt=0;attempt<4&&!saved;attempt++){try{await db.query("INSERT INTO classroom_baseline_students(class_id,display_name,join_code_hash) VALUES($1,$2,$3)",[classroom.id,displayName,await hash(joinCode)]);saved=true}catch(error){joinCode=makeCode()}}if(!saved)return res.status(500).json({error:"Class created, but a student code could not be made. Start a fresh class instead."});roster.push({display_name:displayName,join_code:joinCode})}
     return res.status(201).json({classroom,roster});
   }
   const classroom=await getClass(classId(body.classId));
   if(!classroom)return res.status(404).json({error:"Class not found."});
+  if(!await permitted(user,"baseline",classroom.id))return res.status(403).json({error:"This class is not assigned to your Staff Account."});
   if(body.action==="get_class")return res.json(await classData(classroom));
   if(body.action==="reset_join_codes"){
     const all=body.scope==="class",studentId=String(body.studentId||"");

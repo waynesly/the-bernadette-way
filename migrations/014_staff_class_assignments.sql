@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS staff_class_assignments (account_id uuid NOT NULL REFERENCES staff_journal_accounts(id) ON DELETE CASCADE, class_kind text NOT NULL CHECK (class_kind IN ('baseline','year5')), class_id uuid NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), PRIMARY KEY(account_id,class_kind,class_id))
