@@ -242,4 +242,23 @@ body.site-side-nav main:has(.hero-immersive){max-width:none;padding:0}
 .join-card-sheet .card-kicker{margin:0 0 10px;color:#087f8c;font:800 11px/1.25 var(--font-label);letter-spacing:1.25px}
 .join-card-sheet .code-card h2{margin:0 0 12px;color:#142b50;font:800 31px/1 var(--font-display)}
 .join-card-sheet .card-prompt{max-width:280px;font-size:16px;line-height:1.45}.join-card-sheet code{display:block;margin:25px 0 12px;color:#142b50;font:800 28px/1.15 Georgia,serif;letter-spacing:2px}.join-card-sheet .card-note{font-size:14px;color:#58717b}
-.pdf-render .student-profile-sheet{padding:42px!important}.pdf-render .student-profile-hero{margin:28px 0 26px;padding:26px 28px}.pdf-render .student-profile-hero h1{font-size:40px}.pdf-render .student-profile-hero h2{font-size:20px}.pdf-render .student-profile-hero small{font-size:15px}.pdf-render .student-profile-grid section{min-height:160px;padding:17px}.pdf-render .student-profile-grid p{font-size:13px}.pdf-render .student-profile-grid h3{font-size:21px}.pdf-render .student-profile-grid span{font-size:13px}.pdf-render .student-profile-mission{margin-top:24px;padding:23px 26px}.pdf-render .student-profile-mission h2{font-size:23px}
+/* Screen-rendered PDF profile: html2canvas does not activate @media print. */
+.pdf-render .student-profile-sheet{box-sizing:border-box!important;width:896px!important;padding:42px!important}
+.pdf-render .student-profile-hero{display:grid!important;grid-template-columns:minmax(0,1fr) 245px!important;align-items:center!important;gap:24px!important;margin:26px 0 22px!important;padding:24px 26px!important;border-radius:22px!important;background:linear-gradient(120deg,#e7f7ef,#fff3d4)!important;overflow:hidden!important}
+.pdf-render .student-profile-hero>div{min-width:0!important}
+.pdf-render .student-profile-hero>img{display:block!important;width:245px!important;height:158px!important;max-width:245px!important;max-height:158px!important;object-fit:cover!important;border-radius:16px!important}
+.pdf-render .student-profile-hero p{margin:0 0 8px!important;color:#087f8c!important;font-size:12px!important;font-weight:800!important;letter-spacing:1px!important}
+.pdf-render .student-profile-hero h1{margin:0 0 10px!important;font-size:36px!important;line-height:1.05!important;color:#142b50!important}
+.pdf-render .student-profile-hero h2{margin:0 0 10px!important;font-size:19px!important}
+.pdf-render .student-profile-hero small{display:block!important;font-size:14px!important;line-height:1.4!important}
+.pdf-render .student-profile-heading{margin:22px 0 14px!important;font-size:26px!important;color:#142b50!important}
+.pdf-render .student-profile-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important;width:100%!important}
+.pdf-render .student-profile-grid section{box-sizing:border-box!important;min-width:0!important;min-height:152px!important;padding:16px!important;border:1px solid #c9d9de!important;border-radius:14px!important;background:#fff!important}
+.pdf-render .student-profile-grid section.profile-bright-spot{background:#e6f7ed!important;border:2px solid #67a887!important}
+.pdf-render .student-profile-grid p{margin:0 0 9px!important;color:#087f8c!important;font-size:13px!important;font-weight:800!important}
+.pdf-render .student-profile-grid h3{margin:0 0 8px!important;color:#142b50!important;font-size:19px!important;line-height:1.15!important}
+.pdf-render .student-profile-grid span{display:block!important;font-size:13px!important;line-height:1.4!important}
+.pdf-render .student-profile-mission{margin:22px 0 0!important;padding:20px 24px!important;border-radius:16px!important;background:#17375e!important;color:#fff!important}
+.pdf-render .student-profile-mission b{display:block!important;margin-bottom:8px!important;color:#f5c55b!important;font-size:12px!important}
+.pdf-render .student-profile-mission h2{margin:0 0 8px!important;color:#fff!important;font-size:21px!important;line-height:1.2!important}
+.pdf-render .student-profile-mission p{margin:0!important;color:#fff!important;font-size:13px!important}
