@@ -29,3 +29,8 @@
  .setup-pathways{grid-template-columns:1fr}
  .setup-intro{text-align:left}
 }
+
+/* Shared desktop content gutter: aligned with the Year 5 Strengths Journey. */
+@media(min-width:901px){
+ .landing-page .landing-hero{padding-inline:max(48px,calc((100vw - 1440px)/2))!important}
+}

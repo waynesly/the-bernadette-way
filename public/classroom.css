@@ -101,6 +101,8 @@ body.site-side-nav main:has(.hero-immersive){max-width:none;padding:0}
   body.site-side-nav main:has(.hero-immersive){min-height:calc(100svh - 94px)}
   .hero.hero-immersive{
     min-height:calc(100svh - 94px);
+    /* Match the Year 5 journey's desktop content gutter. */
+    padding-inline:max(48px,calc((100vw - 1440px)/2));
     padding-block:clamp(24px,4vh,64px);
     align-items:center;
   }
