@@ -1,0 +1,1 @@
+ALTER TABLE staff_journal_accounts ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'teacher' CHECK (role IN ('teacher','admin'));
