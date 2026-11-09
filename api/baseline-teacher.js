@@ -9,7 +9,7 @@ function classId(value){return String(value||"").trim()}
 async function getClass(id){const {rows}=await db.query("SELECT id,class_name,calendar_year,current_window FROM classroom_baseline_classes WHERE id=$1",[id]);return rows[0]||null}
 async function listClasses(user){const {rows}=await db.query(`SELECT c.id,c.class_name,c.calendar_year,c.current_window,COUNT(s.id)::int AS student_count
   FROM classroom_baseline_classes c LEFT JOIN classroom_baseline_students s ON s.class_id=c.id
-  WHERE ($1::boolean OR c.id = ANY($2::uuid[])) GROUP BY c.id ORDER BY c.calendar_year DESC,c.class_name ASC`,[user.role==="admin",await assignments(user,"baseline")||[]]);return rows}
+  WHERE ($1::boolean OR c.id = ANY($2::uuid[])) GROUP BY c.id ORDER BY c.calendar_year DESC,c.class_name ASC`,[["admin","pastoral_care"].includes(user.role),await assignments(user,"baseline")||[]]);return rows}
 async function classData(classroom){
   const {rows}=await db.query(`SELECT s.id,s.display_name,a.assessment_window,a.status,a.scores,a.completed_at,a.responses
     FROM classroom_baseline_students s LEFT JOIN classroom_baseline_attempts a ON a.student_id=s.id
