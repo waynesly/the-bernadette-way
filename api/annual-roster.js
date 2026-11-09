@@ -21,7 +21,10 @@ export default async function(req,res){
    level=Number(row.year),className=trim(row.className,80).replace(/\s+/g," ").replace(/^year\s*/i,"Year ").replace(/\b(blue|red)\b/i,x=>x[0].toUpperCase()+x.slice(1).toLowerCase());
   if(!/^[A-Za-z0-9_-]{2,80}$/.test(schoolId)||!first||!surname||!STANDARD_CLASSES.includes(className)||level!==Number(className.match(/^Year (\d)/)?.[1])||seen.has(schoolId))
    return res.status(400).json({error:"Invalid student ID, year, class or duplicate ID on CSV row "+(i+2)+". No students were imported."});
-  seen.add(schoolId);prepared.push({schoolId,displayName:first+" "+surname,className});
+  // Keep only the first name and first Unicode letter of the surname. The school ID is the matching key.
+  const initial=Array.from(surname)[0]?.toLocaleUpperCase("en-AU");
+  if(!initial || !/\p{L}/u.test(initial))return res.status(400).json({error:"A surname initial is required on CSV row "+(i+2)+". No students were imported."});
+  seen.add(schoolId);prepared.push({schoolId,displayName:first+" "+initial+".",className});
  }
  const classes=await classSummary(year);
  if(classes.baseline.length!==8||classes.leadership.length!==2)return res.status(409).json({error:"Provision this year's ten classes before importing."});
