@@ -28,8 +28,29 @@ async function action(fn){const btn=$(fn);btn.disabled=true;try{msg("");if(fn===
  const f=$("csv").files[0];if(!f)throw Error("Choose a CSV file.");if(f.size>150000)throw Error("CSV exceeds the size limit.");
  const students=csv(await f.text());if(!students.length||students.length>500)throw Error("CSV must contain 1–500 students.");
  const year=Number($("year").value);if(!confirm("Import "+students.length+" students into "+year+"? Existing records for this year will be retained, and Year 5 will have two separate sections."))return;
- const data=await api("import",{students});newCards=data.joinCards;$("result").hidden=!newCards.length;
- msg("Imported "+data.created+" Years 3–6 students and "+data.year5Created+" Year 5 leadership records; skipped "+data.skipped+" existing students. "+(newCards.length?"Download the NEW join codes immediately.":"No new codes were generated."));await check()
+ newCards=[];$("result").hidden=true;
+ const started=performance.now(),batchSize=20,progress=$("import-progress"),bar=$("import-bar"),meter=$("import-meter"),clock=$("import-clock");
+ const summary={created:0,skipped:0,year5Created:0};let processed=0;
+ progress.hidden=false;bar.max=students.length;bar.value=0;
+ const formatTime=seconds=>{const n=Math.max(0,Math.round(seconds));return Math.floor(n/60)+"m "+String(n%60).padStart(2,"0")+"s"};
+ const update=()=>{const elapsed=(performance.now()-started)/1000,percent=Math.floor(100*processed/students.length),remaining=processed?elapsed*(students.length-processed)/processed:null;bar.value=processed;meter.textContent=processed+" / "+students.length+" students ("+percent+"%)";clock.textContent="Elapsed: "+formatTime(elapsed)+(remaining===null?" · Estimating time remaining…":" · Estimated remaining: "+formatTime(remaining))};
+ update();
+ for(let offset=0;offset<students.length;offset+=batchSize){
+  const batch=students.slice(offset,offset+batchSize);
+  let data;
+  for(let attempt=0;attempt<3;attempt++){
+   try{data=await api("import",{students:batch});break}catch(error){
+    if(attempt===2)throw Error("Import paused after "+processed+" of "+students.length+" students. "+error.message+" Download any new codes shown below before retrying; existing records will be skipped.");
+    await new Promise(resolve=>setTimeout(resolve,1500*(attempt+1)));
+   }
+  }
+  summary.created+=data.created;summary.skipped+=data.skipped;summary.year5Created+=data.year5Created;
+  newCards.push(...data.joinCards);$("result").hidden=!newCards.length;
+  processed+=batch.length;update();
+  // Small pause between batches to leave capacity for teachers and students.
+  if(processed<students.length)await new Promise(resolve=>setTimeout(resolve,350));
+ }
+ msg("Finished in "+formatTime((performance.now()-started)/1000)+". Imported "+summary.created+" Years 3–6 students and "+summary.year5Created+" Year 5 leadership records; skipped "+summary.skipped+" existing students. "+(newCards.length?"Download the NEW join codes immediately.":"No new codes were generated."));await check()
  }}catch(e){msg(e.message)}finally{btn.disabled=false}}
 ["check","provision","import"].forEach(id=>$(id).onclick=()=>action(id));
 $("download").onclick=()=>{if(!newCards.length)return;
